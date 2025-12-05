@@ -20,7 +20,7 @@ kotlin {
         }
 
         val commonTest by getting {
-            kotlin.srcDir("commonMain/tests")
+            kotlin.srcDir("commonTest/kotlin")
             dependencies {
                 implementation(kotlin("test"))
             }
