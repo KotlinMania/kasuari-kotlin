@@ -1,4 +1,4 @@
-name: Continuous Integration
+name: CI
 
 on:
   push:
@@ -15,72 +15,31 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - name: std (windows)
-            os: windows-2022
-            target: x86_64-pc-windows-msvc
-            args: ""
-            run_tests: true
-          - name: std (macos)
-            os: macos-latest
-            target: x86_64-apple-darwin
-            args: ""
-            run_tests: true
-          - name: std (linux)
-            os: ubuntu-latest
-            target: x86_64-unknown-linux-gnu
-            args: ""
-            run_tests: true
-          - name: no_std (thumbv7em)
-            os: ubuntu-latest
-            target: thumbv7em-none-eabi
-            args: "--no-default-features"
-            run_tests: false
-          - name: no_std (riscv32 + portable-atomic)
-            os: ubuntu-latest
-            target: riscv32imc-unknown-none-elf
-            args: "--no-default-features --features portable-atomic,portable-atomic/unsafe-assume-single-core"
-            run_tests: false
+        os: [ubuntu-latest, macos-latest, windows-latest]
 
-    name: ${{ matrix.name }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v4
 
-      - uses: dtolnay/rust-toolchain@stable
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
         with:
-          target: ${{ matrix.target }}
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
 
       - name: Build
-        run: cargo build --target ${{ matrix.target }} ${{ matrix.args }}
+        run: ./gradlew assemble
 
-      - name: Test
-        if: matrix.run_tests
-        run: cargo test --target ${{ matrix.target }}
-  clippy:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
-      - uses: dtolnay/rust-toolchain@stable
-      - run: cargo clippy --all-targets --all-features -- -D warnings
-  fmt:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
-      - uses: dtolnay/rust-toolchain@nightly
-        with:
-          components: rustfmt
-      - run: cargo fmt -- --check
-  coverage:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
-      - uses: dtolnay/rust-toolchain@stable
-        with:
-          components: llvm-tools
-      - uses: taiki-e/install-action@cargo-llvm-cov
-      - run: cargo llvm-cov --lcov --output-path target/lcov.info
-      - uses: codecov/codecov-action@v5
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          slug: ratatui/kasuari
-          fail_ci_if_error: false
+      - name: Test (Linux)
+        if: runner.os == 'Linux'
+        run: ./gradlew linuxX64Test
+
+      - name: Test (macOS)
+        if: runner.os == 'macOS'
+        run: ./gradlew macosArm64Test macosX64Test
+
+      - name: Test (Windows)
+        if: runner.os == 'Windows'
+        run: ./gradlew mingwX64Test
