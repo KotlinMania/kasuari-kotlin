@@ -237,4 +237,88 @@ class ExpressionTest {
         assertEquals(3, copy.terms.size)
         assertEquals(10.0, copy.constant)
     }
+
+    // ============================================================================
+    // Compound assignment tests
+    // ============================================================================
+
+    @Test
+    fun timesAssignF64() {
+        val expr = Expression.new(listOf(Term.new(LEFT, 2.0)), 4.0)
+        expr *= 3.0
+        assertEquals(6.0, expr.terms[0].coefficient)
+        assertEquals(12.0, expr.constant)
+    }
+
+    @Test
+    fun timesAssignF32() {
+        val expr = Expression.new(listOf(Term.new(LEFT, 2.0)), 4.0)
+        expr *= 3.0f
+        assertEquals(6.0, expr.terms[0].coefficient)
+        assertEquals(12.0, expr.constant)
+    }
+
+    @Test
+    fun divAssignF64() {
+        val expr = Expression.new(listOf(Term.new(LEFT, 6.0)), 12.0)
+        expr /= 2.0
+        assertEquals(3.0, expr.terms[0].coefficient)
+        assertEquals(6.0, expr.constant)
+    }
+
+    @Test
+    fun divAssignF32() {
+        val expr = Expression.new(listOf(Term.new(LEFT, 6.0)), 12.0)
+        expr /= 2.0f
+        assertEquals(3.0, expr.terms[0].coefficient)
+        assertEquals(6.0, expr.constant)
+    }
+
+    @Test
+    fun plusAssignF64() {
+        val expr = Expression.new(listOf(LEFT_TERM), 5.0)
+        expr += 3.0
+        assertEquals(8.0, expr.constant)
+    }
+
+    @Test
+    fun plusAssignF32() {
+        val expr = Expression.new(listOf(LEFT_TERM), 5.0)
+        expr += 3.0f
+        assertEquals(8.0, expr.constant)
+    }
+
+    @Test
+    fun plusAssignExpression() {
+        val expr1 = Expression.new(listOf(LEFT_TERM), 2.0)
+        val expr2 = Expression.new(listOf(RIGHT_TERM), 3.0)
+        expr1 += expr2
+        assertEquals(2, expr1.terms.size)
+        assertEquals(5.0, expr1.constant)
+    }
+
+    @Test
+    fun minusAssignF64() {
+        val expr = Expression.new(listOf(LEFT_TERM), 5.0)
+        expr -= 3.0
+        assertEquals(2.0, expr.constant)
+    }
+
+    @Test
+    fun minusAssignF32() {
+        val expr = Expression.new(listOf(LEFT_TERM), 5.0)
+        expr -= 3.0f
+        assertEquals(2.0, expr.constant)
+    }
+
+    @Test
+    fun minusAssignExpression() {
+        val expr1 = Expression.new(listOf(LEFT_TERM), 5.0)
+        val expr2 = Expression.new(listOf(RIGHT_TERM), 3.0)
+        expr1 -= expr2
+        assertEquals(2, expr1.terms.size)
+        assertEquals(1.0, expr1.terms[0].coefficient)  // LEFT_TERM unchanged
+        assertEquals(-1.0, expr1.terms[1].coefficient) // -RIGHT_TERM
+        assertEquals(2.0, expr1.constant)
+    }
 }

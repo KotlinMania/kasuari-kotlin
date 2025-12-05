@@ -1,22 +1,46 @@
 package kasuari
 
 /**
- * The solver entered an invalid state. If this occurs please report the issue.
+ * Internal solver errors that indicate bugs in the solver implementation.
+ *
+ * These errors should never occur during normal operation. If you encounter one,
+ * please report it as a bug.
+ *
+ * @see Solver
  */
 sealed class InternalSolverError : Exception() {
-    /** The objective is unbounded. */
+    /**
+     * The objective function is unbounded.
+     *
+     * This indicates the solver could not find a finite minimum for the objective function.
+     */
     data object ObjectiveUnbounded : InternalSolverError() {
         override val message: String = "The objective is unbounded."
     }
-    /** Dual optimize failed. */
+
+    /**
+     * The dual simplex optimization failed.
+     *
+     * This indicates a failure during the dual optimization phase.
+     */
     data object DualOptimizeFailed : InternalSolverError() {
         override val message: String = "Dual optimize failed."
     }
-    /** Failed to find leaving row. */
+
+    /**
+     * Failed to find a leaving row during pivot.
+     *
+     * This indicates the solver could not find a valid row to pivot out.
+     */
     data object FailedToFindLeavingRow : InternalSolverError() {
         override val message: String = "Failed to find leaving row."
     }
-    /** Edit constraint not in system */
+
+    /**
+     * Edit constraint was not found in the system.
+     *
+     * This indicates an internal inconsistency with edit variable management.
+     */
     data object EditConstraintNotInSystem : InternalSolverError() {
         override val message: String = "Edit constraint not in system"
     }
@@ -34,8 +58,75 @@ private data class EditInfo(
 )
 
 /**
- * A constraint solver using the Cassowary algorithm. For proper usage please see the top level
- * crate documentation.
+ * A constraint solver using the Cassowary algorithm.
+ *
+ * The Cassowary algorithm is an incremental constraint solving algorithm designed for
+ * user interface layout. It efficiently solves systems of linear equality and inequality
+ * constraints, making it ideal for responsive layouts.
+ *
+ * ## Basic Usage
+ *
+ * ```kotlin
+ * // Create a solver
+ * val solver = Solver.new()
+ *
+ * // Create variables
+ * val left = Variable.new()
+ * val width = Variable.new()
+ * val right = Variable.new()
+ *
+ * // Add constraints
+ * solver.addConstraint(right with WeightedRelation.EQ(Strength.REQUIRED) to (left + width))
+ * solver.addConstraint(left with WeightedRelation.EQ(Strength.REQUIRED) to 0.0)
+ * solver.addConstraint(width with WeightedRelation.EQ(Strength.STRONG) to 100.0)
+ *
+ * // Read values
+ * println("left: ${solver.getValue(left)}")    // 0.0
+ * println("width: ${solver.getValue(width)}")  // 100.0
+ * println("right: ${solver.getValue(right)}")  // 100.0
+ * ```
+ *
+ * ## Edit Variables
+ *
+ * For interactive applications, use edit variables to dynamically change values:
+ *
+ * ```kotlin
+ * val solver = Solver.new()
+ * val x = Variable.new()
+ *
+ * // Add a constraint that x >= 0
+ * solver.addConstraint(x with WeightedRelation.GE(Strength.REQUIRED) to 0.0)
+ *
+ * // Register x as an edit variable
+ * solver.addEditVariable(x, Strength.STRONG)
+ *
+ * // Suggest values for x
+ * solver.suggestValue(x, 50.0)
+ * println(solver.getValue(x))  // 50.0
+ *
+ * solver.suggestValue(x, -10.0)
+ * println(solver.getValue(x))  // 0.0 (constrained to >= 0)
+ * ```
+ *
+ * ## Incremental Updates
+ *
+ * For efficiency, use [fetchChanges] to get only the variables that changed:
+ *
+ * ```kotlin
+ * solver.suggestValue(x, 100.0)
+ * for ((variable, value) in solver.fetchChanges()) {
+ *     println("$variable changed to $value")
+ * }
+ * ```
+ *
+ * ## Thread Safety
+ *
+ * The solver is **not** thread-safe. Access from multiple threads must be externally synchronized.
+ *
+ * @see Variable
+ * @see Constraint
+ * @see Strength
+ * @see WeightedRelation
  */
 class Solver {
     private val constraints: MutableMap<Constraint, Tag> = mutableMapOf()
@@ -52,17 +143,46 @@ class Solver {
     private var idTick: Int = 1
 
     companion object {
-        /** Construct a new solver. */
+        /**
+         * Creates a new constraint solver.
+         *
+         * @return A new empty [Solver] instance.
+         */
         fun new(): Solver = Solver()
     }
 
+    /**
+     * Adds multiple constraints to the solver.
+     *
+     * This is equivalent to calling [addConstraint] for each constraint in the iterable.
+     * If any constraint fails to be added, an exception is thrown and previous constraints
+     * remain in the solver.
+     *
+     * @param constraints The constraints to add.
+     * @throws AddConstraintError.DuplicateConstraint If any constraint was already added.
+     * @throws AddConstraintError.UnsatisfiableConstraint If any required constraint conflicts.
+     * @see addConstraint
+     */
     fun addConstraints(constraints: Iterable<Constraint>) {
         for (constraint in constraints) {
             addConstraint(constraint)
         }
     }
 
-    /** Add a constraint to the solver. */
+    /**
+     * Adds a constraint to the solver.
+     *
+     * The solver will immediately incorporate the constraint and update all affected
+     * variable values. After this call, [getValue] will return values that satisfy
+     * the new constraint (subject to strength priorities).
+     *
+     * @param constraint The constraint to add.
+     * @throws AddConstraintError.DuplicateConstraint If the constraint was already added.
+     * @throws AddConstraintError.UnsatisfiableConstraint If the constraint is required
+     *         but conflicts with existing required constraints.
+     * @see removeConstraint
+     * @see hasConstraint
+     */
     fun addConstraint(constraint: Constraint) {
         if (constraints.containsKey(constraint)) {
             // TODO determine if we could just ignore duplicate constraints
@@ -113,7 +233,16 @@ class Solver {
         optimize(objective)
     }
 
-    /** Remove a constraint from the solver. */
+    /**
+     * Removes a constraint from the solver.
+     *
+     * The solver will immediately update all affected variable values.
+     *
+     * @param constraint The constraint to remove. Must be the same instance that was added.
+     * @throws RemoveConstraintError.UnknownConstraint If the constraint was not found.
+     * @see addConstraint
+     * @see hasConstraint
+     */
     fun removeConstraint(constraint: Constraint) {
         val tag = constraints.remove(constraint)
             ?: throw RemoveConstraintError.UnknownConstraint
@@ -156,15 +285,32 @@ class Solver {
         }
     }
 
-    /** Test whether a constraint has been added to the solver. */
+    /**
+     * Tests whether a constraint has been added to the solver.
+     *
+     * @param constraint The constraint to check.
+     * @return `true` if the constraint is in the solver, `false` otherwise.
+     */
     fun hasConstraint(constraint: Constraint): Boolean =
         constraints.containsKey(constraint)
 
     /**
-     * Add an edit variable to the solver.
+     * Adds an edit variable to the solver.
      *
-     * This method should be called before the `suggestValue` method is
-     * used to supply a suggested value for the given edit variable.
+     * Edit variables allow you to dynamically change variable values using [suggestValue].
+     * This is useful for interactive applications where user input should influence the
+     * constraint solution.
+     *
+     * The strength determines how strongly the suggested value should be enforced relative
+     * to other constraints. The strength must be less than [Strength.REQUIRED].
+     *
+     * @param v The variable to make editable.
+     * @param strength The strength of the edit constraint (must not be [Strength.REQUIRED]).
+     * @throws AddEditVariableError.DuplicateEditVariable If the variable is already an edit variable.
+     * @throws AddEditVariableError.BadRequiredStrength If strength is [Strength.REQUIRED].
+     * @see suggestValue
+     * @see removeEditVariable
+     * @see hasEditVariable
      */
     fun addEditVariable(v: Variable, strength: Strength) {
         if (edits.containsKey(v)) {
@@ -186,7 +332,16 @@ class Solver {
         )
     }
 
-    /** Remove an edit variable from the solver. */
+    /**
+     * Removes an edit variable from the solver.
+     *
+     * After removal, [suggestValue] can no longer be called for this variable.
+     *
+     * @param v The variable to remove as an edit variable.
+     * @throws RemoveEditVariableError.UnknownEditVariable If the variable is not an edit variable.
+     * @see addEditVariable
+     * @see hasEditVariable
+     */
     fun removeEditVariable(v: Variable) {
         val editInfo = edits.remove(v)
         if (editInfo != null) {
@@ -202,15 +357,27 @@ class Solver {
         }
     }
 
-    /** Test whether an edit variable has been added to the solver. */
+    /**
+     * Tests whether a variable is registered as an edit variable.
+     *
+     * @param v The variable to check.
+     * @return `true` if the variable is an edit variable, `false` otherwise.
+     */
     fun hasEditVariable(v: Variable): Boolean =
         edits.containsKey(v)
 
     /**
-     * Suggest a value for the given edit variable.
+     * Suggests a value for an edit variable.
      *
-     * This method should be used after an edit variable has been added to
-     * the solver in order to suggest the value for that variable.
+     * The solver will try to make the variable equal to the suggested value, subject
+     * to the edit variable's strength and other constraints. This method can be called
+     * repeatedly to update the suggested value.
+     *
+     * @param variable The edit variable to suggest a value for.
+     * @param value The suggested value.
+     * @throws SuggestValueError.UnknownEditVariable If the variable is not an edit variable.
+     * @see addEditVariable
+     * @see getValue
      */
     fun suggestValue(variable: Variable, value: Double) {
         val info = edits[variable]
@@ -262,10 +429,20 @@ class Solver {
     }
 
     /**
-     * Fetches all changes to the values of variables since the last call to this function.
+     * Fetches all changes to variable values since the last call to this function.
      *
-     * The list of changes returned is not in a specific order. Each change comprises the variable
-     * changed and the new value of that variable.
+     * This is the most efficient way to track changes in an interactive application.
+     * Instead of polling all variables, call this method to get only the variables
+     * whose values have changed.
+     *
+     * The list of changes is not in any specific order. Each change is a pair of
+     * the variable and its new value.
+     *
+     * **Note:** Calling this method clears the internal change tracker. Calling it
+     * twice in a row without any intervening operations will return an empty list
+     * the second time.
+     *
+     * @return A list of (variable, new value) pairs for all changed variables.
      */
     fun fetchChanges(): List<Pair<Variable, Double>> {
         if (shouldClearChanges) {
@@ -292,13 +469,14 @@ class Solver {
     }
 
     /**
-     * Reset the solver to the empty starting condition.
+     * Resets the solver to the empty starting condition.
      *
-     * This method resets the internal solver state to the empty starting
-     * condition, as if no constraints or edit variables have been added.
-     * This can be faster than deleting the solver and creating a new one
-     * when the entire system must change, since it can avoid unnecessary
-     * heap (de)allocations.
+     * This clears all constraints, edit variables, and variable values,
+     * returning the solver to its initial state as if it were newly created.
+     *
+     * This can be more efficient than creating a new solver instance when
+     * the entire constraint system needs to be rebuilt, as it reuses the
+     * internal data structures.
      */
     fun reset() {
         rows.clear()
@@ -738,10 +916,18 @@ class Solver {
     }
 
     /**
-     * Get the stored value for a variable.
+     * Gets the current value of a variable.
      *
-     * Normally values should be retrieved and updated using `fetchChanges`, but this method can
-     * be used for debugging or testing.
+     * Returns the value the solver has computed for the given variable based on
+     * the current constraints. For variables not involved in any constraint,
+     * returns 0.0.
+     *
+     * For interactive applications, [fetchChanges] is more efficient for tracking
+     * changes to multiple variables. This method is useful for debugging, testing,
+     * or when you need the value of a specific variable.
+     *
+     * @param v The variable to get the value for.
+     * @return The current value of the variable.
      */
     fun getValue(v: Variable): Double {
         val data = varData[v] ?: return 0.0

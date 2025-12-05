@@ -249,4 +249,29 @@ class StrengthTest {
     fun scalarMulTwo() {
         assertEquals(2.0 * Strength.WEAK, Strength.new(2.0))
     }
+
+    // ============================================================================
+    // Compound assignment tests (via auto-reassignment for immutable Strength)
+    // ============================================================================
+
+    @Test
+    fun addAssign() {
+        var strength = Strength.WEAK
+        strength += Strength.MEDIUM
+        assertEquals(Strength.new(1001.0), strength)
+    }
+
+    @Test
+    fun subAssign() {
+        var strength = Strength.MEDIUM
+        strength -= Strength.WEAK
+        assertEquals(Strength.new(999.0), strength)
+    }
+
+    @Test
+    fun mulAssign() {
+        var strength = Strength.WEAK
+        strength *= 2.0
+        assertEquals(Strength.new(2.0), strength)
+    }
 }
