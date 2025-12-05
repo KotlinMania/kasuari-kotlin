@@ -28,11 +28,42 @@ These abstractions belong in a higher-level library.
 
 ## Installation
 
-Add the dependency to your `build.gradle.kts`:
+### As a Git Submodule (Recommended)
+
+This library is not yet published to Maven Central. The recommended approach is to include it as a
+git submodule or vendored dependency:
+
+```bash
+git submodule add https://github.com/KotlinMania/kasuari-kotlin.git
+```
+
+Then in your `settings.gradle.kts`:
+
+```kotlin
+include(":kasuari-kotlin")
+```
+
+And in your module's `build.gradle.kts`:
+
+```kotlin
+kotlin {
+    sourceSets {
+        val commonMain by getting {
+            dependencies {
+                implementation(project(":kasuari-kotlin"))
+            }
+        }
+    }
+}
+```
+
+### Future Maven Central Publication
+
+Once published to Maven Central, you'll be able to add it directly:
 
 ```kotlin
 dependencies {
-    implementation("ai.solace.kasuari:kasuari-kotlin:1.0.0")
+    implementation("io.github.kotlinmania:kasuari-kotlin:1.0.0")
 }
 ```
 
