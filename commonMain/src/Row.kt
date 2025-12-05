@@ -1,6 +1,12 @@
 package kasuari
 
-class Row(
+/**
+ * Internal row representation for the simplex tableau.
+ *
+ * A row represents a linear equation in the tableau, storing coefficients
+ * for each symbol and a constant term.
+ */
+internal class Row(
     val cells: MutableMap<Symbol, Double> = mutableMapOf(),
     var constant: Double
 ) {
@@ -76,7 +82,13 @@ class Row(
     }
 }
 
-data class Symbol(val id: Int, val kind: SymbolKind) : Comparable<Symbol> {
+/**
+ * Internal symbol used in the simplex tableau.
+ *
+ * Symbols represent variables in the tableau and have different kinds
+ * depending on their role in the algorithm.
+ */
+internal data class Symbol(val id: Int, val kind: SymbolKind) : Comparable<Symbol> {
     override fun compareTo(other: Symbol): Int {
         val idCmp = id.compareTo(other.id)
         return if (idCmp != 0) idCmp else kind.compareTo(other.kind)
@@ -88,17 +100,28 @@ data class Symbol(val id: Int, val kind: SymbolKind) : Comparable<Symbol> {
     }
 }
 
-enum class SymbolKind {
+/**
+ * The kind of symbol in the simplex tableau.
+ */
+internal enum class SymbolKind {
+    /** Invalid/uninitialized symbol. */
     Invalid,
+    /** External variable from user constraints. */
     External,
+    /** Slack variable for inequality constraints. */
     Slack,
+    /** Error variable for soft constraints. */
     Error,
+    /** Dummy variable for required equality constraints. */
     Dummy,
 }
 
 private const val EPS: Double = 1E-8
 
-fun nearZero(value: Double): Boolean {
+/**
+ * Check if a value is effectively zero within floating-point tolerance.
+ */
+internal fun nearZero(value: Double): Boolean {
     return if (value < 0.0) {
         -value < EPS
     } else {
