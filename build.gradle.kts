@@ -1,9 +1,14 @@
 plugins {
     kotlin("multiplatform") version "2.2.10"
+    id("com.vanniktech.maven.publish") version "0.30.0"
 }
 
-group = "io.github.kasuari"
+group = "io.github.kotlinmania"
 version = "0.1.0-SNAPSHOT"
+
+repositories {
+    mavenCentral()
+}
 
 kotlin {
     applyDefaultHierarchyTemplate()
@@ -34,6 +39,43 @@ kotlin {
             dependencies {
                 implementation(kotlin("test"))
             }
+        }
+    }
+}
+
+mavenPublishing {
+    publishToMavenCentral(com.vanniktech.maven.publish.SonatypeHost.CENTRAL_PORTAL)
+    signAllPublications()
+
+    coordinates(group.toString(), "kasuari-kotlin", version.toString())
+
+    pom {
+        name.set("kasuari-kotlin")
+        description.set("Kotlin Multiplatform port of Cassowary constraint solving algorithm")
+        inceptionYear.set("2024")
+        url.set("https://github.com/KotlinMania/kasuari-kotlin")
+
+        licenses {
+            license {
+                name.set("Apache-2.0")
+                url.set("https://www.apache.org/licenses/LICENSE-2.0.txt")
+                distribution.set("repo")
+            }
+        }
+
+        developers {
+            developer {
+                id.set("sydneyrenee")
+                name.set("Sydney Renee")
+                email.set("sydney@thesolace.ai")
+                url.set("https://github.com/sydneyrenee")
+            }
+        }
+
+        scm {
+            url.set("https://github.com/KotlinMania/kasuari-kotlin")
+            connection.set("scm:git:git://github.com/KotlinMania/kasuari-kotlin.git")
+            developerConnection.set("scm:git:ssh://github.com/KotlinMania/kasuari-kotlin.git")
         }
     }
 }
