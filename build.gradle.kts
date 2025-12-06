@@ -67,7 +67,7 @@ mavenPublishing {
             developer {
                 id.set("sydneyrenee")
                 name.set("Sydney Renee")
-                email.set("sydney@thesolace.ai")
+                email.set("sydney@solace.ofharmony.ai")
                 url.set("https://github.com/sydneyrenee")
             }
         }
