@@ -3,3 +3,6 @@ target
 /*.iml
 .env
 /build/
+/.gradle/
+/.android-sdk/
+local.properties
