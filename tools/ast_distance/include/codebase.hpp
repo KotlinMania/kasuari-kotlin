@@ -4,7 +4,6 @@
 #include "ast_parser.hpp"
 #include "similarity.hpp"
 #include "porting_utils.hpp"
-#include "port_lint.hpp"
 #include <filesystem>
 #include <map>
 #include <set>
@@ -22,12 +21,12 @@ namespace ast_distance {
  * Represents a source file with its metadata.
  */
 struct SourceFile {
-    std::string path;              // Full path
-    std::string relative_path;     // Relative to root
-    std::string filename;          // Just the filename (e.g., "Block.kt")
-    std::string stem;              // Filename without extension (e.g., "Block")
-    std::string qualified_name;    // Disambiguated name (e.g., "widgets.Block")
-    std::string extension;         // File extension
+    std::vector<std::string> paths; // All physical paths (e.g., .hpp and .cpp)
+    std::string relative_path;     // Representative relative path
+    std::string filename;          // Representative filename
+    std::string stem;              // Stem shared by all paths
+    std::string qualified_name;    // Logical name for matching
+    std::string extension;         // Representative extension
 
     PackageDecl package;           // Package/module declaration from source
     std::vector<Import> imports;   // Imports in this file
@@ -43,7 +42,6 @@ struct SourceFile {
 
     // Porting analysis
     std::string transliterated_from;  // "Transliterated from:" header value
-    std::string port_lint_source;     // "// port-lint: source" header value
     int line_count = 0;
     int code_lines = 0;
     bool is_stub = false;
@@ -142,30 +140,80 @@ public:
             return false;
         };
 
+        if (fs::is_regular_file(root_path)) {
+            // Handle single file input
+            if (has_valid_ext(root_path)) {
+                SourceFile sf;
+                sf.paths.push_back(root_path);
+                sf.relative_path = fs::path(root_path).filename().string();
+                sf.filename = fs::path(root_path).filename().string();
+                sf.stem = fs::path(root_path).stem().string();
+                sf.extension = fs::path(root_path).extension().string();
+                sf.qualified_name = SourceFile::make_qualified_name(sf.relative_path);
+
+                files[sf.stem] = sf;
+                by_stem[sf.stem].push_back(sf.stem);
+                by_qualified[sf.qualified_name] = sf.stem;
+            }
+            return;
+        }
+
         for (const auto& entry : fs::recursive_directory_iterator(root_path)) {
             if (!entry.is_regular_file()) continue;
 
             std::string path = entry.path().string();
             if (!has_valid_ext(path)) continue;
 
-            // Skip test files and build artifacts
-            if (path.find("/test") != std::string::npos ||
-                path.find("/target/") != std::string::npos ||
+            // Skip build artifacts
+            if (path.find("/target/") != std::string::npos ||
                 path.find("/build/") != std::string::npos) {
                 continue;
             }
 
-            SourceFile sf;
-            sf.path = path;
-            sf.relative_path = fs::relative(path, root_path).string();
-            sf.filename = entry.path().filename().string();
-            sf.stem = entry.path().stem().string();
-            sf.extension = entry.path().extension().string();
-            sf.qualified_name = SourceFile::make_qualified_name(sf.relative_path);
+            std::string rel_path = fs::relative(path, root_path).string();
+            std::string stem = entry.path().stem().string();
+            std::string filename = entry.path().filename().string();
+            std::string extension = entry.path().extension().string();
 
-            files[sf.relative_path] = sf;
-            by_stem[sf.stem].push_back(sf.relative_path);
-            by_qualified[sf.qualified_name] = sf.relative_path;
+            // Logical grouping for C++: same stem in same directory
+            std::string directory = fs::path(rel_path).parent_path().string();
+            
+            // Normalize stem by stripping common platform/variant suffixes
+            std::string normalized_stem = stem;
+            static const std::vector<std::string> suffixes = {
+                ".common", ".concurrent", ".native", ".common_native", ".darwin", ".apple"
+            };
+            for (const auto& suffix : suffixes) {
+                if (normalized_stem.size() > suffix.size() && 
+                    normalized_stem.compare(normalized_stem.size() - suffix.size(), suffix.size(), suffix) == 0) {
+                    normalized_stem = normalized_stem.substr(0, normalized_stem.size() - suffix.size());
+                    break;
+                }
+            }
+
+            std::string logical_key = directory.empty() ? normalized_stem : directory + "/" + normalized_stem;
+
+            if (files.count(logical_key)) {
+                files[logical_key].paths.push_back(path);
+                // Prefer .hpp as the representative extension/filename if pairing
+                if (extension == ".hpp" || extension == ".h") {
+                    files[logical_key].filename = filename;
+                    files[logical_key].extension = extension;
+                    files[logical_key].relative_path = rel_path;
+                }
+            } else {
+                SourceFile sf;
+                sf.paths.push_back(path);
+                sf.relative_path = rel_path;
+                sf.filename = filename;
+                sf.stem = stem;
+                sf.extension = extension;
+                sf.qualified_name = SourceFile::make_qualified_name(rel_path);
+
+                files[logical_key] = sf;
+                by_stem[sf.stem].push_back(logical_key);
+                by_qualified[sf.qualified_name] = logical_key;
+            }
         }
 
         // Handle duplicates - if multiple files have same stem, use qualified names
@@ -218,8 +266,15 @@ public:
         ImportExtractor extractor;
 
         for (auto& [path, sf] : files) {
-            sf.imports = extractor.extract_from_file(sf.path);
-            sf.package = extractor.extract_package_from_file(sf.path);
+            for (const auto& p : sf.paths) {
+                auto file_imports = extractor.extract_from_file(p);
+                sf.imports.insert(sf.imports.end(), file_imports.begin(), file_imports.end());
+                
+                // Also aggregate package if not set
+                if (sf.package.parts.empty()) {
+                    sf.package = extractor.extract_package_from_file(p);
+                }
+            }
             sf.dependency_count = sf.imports.size();
         }
     }
@@ -229,23 +284,29 @@ public:
      */
     void extract_porting_data() {
         for (auto& [path, sf] : files) {
-            // Extract "Transliterated from:" header
-            sf.transliterated_from = PortingAnalyzer::extract_transliterated_from(sf.path);
-            
-            // Extract "// port-lint: source" header
-            if (auto source = port_lint::extract_source_annotation(sf.path)) {
-                sf.port_lint_source = *source;
+            for (const auto& p : sf.paths) {
+                // Extract "Transliterated from:" header (first one wins or aggregate)
+                if (sf.transliterated_from.empty()) {
+                    sf.transliterated_from = PortingAnalyzer::extract_transliterated_from(p);
+                }
+
+                // Get file stats and aggregate
+                FileStats stats = PortingAnalyzer::analyze_file(p);
+                sf.line_count += stats.line_count;
+                sf.code_lines += stats.code_lines;
+                sf.is_stub = sf.is_stub || stats.is_stub; // If any part is NOT a stub, maybe it's not a stub? 
+                                                         // Actually, usually if BOTH are stubs it's a stub.
+                                                         // Let's say if ALL are stubs, it's a stub.
+                
+                sf.todos.insert(sf.todos.end(), stats.todos.begin(), stats.todos.end());
+
+                // Run lint checks
+                auto lints = PortingAnalyzer::lint_file(p);
+                sf.lint_errors.insert(sf.lint_errors.end(), lints.begin(), lints.end());
             }
-
-            // Get file stats
-            FileStats stats = PortingAnalyzer::analyze_file(sf.path);
-            sf.line_count = stats.line_count;
-            sf.code_lines = stats.code_lines;
-            sf.is_stub = stats.is_stub;
-            sf.todos = stats.todos;
-
-            // Run lint checks
-            sf.lint_errors = PortingAnalyzer::lint_file(sf.path);
+            
+            // Refine stub detection: if we have significant code lines across both, it's not a stub
+            if (sf.code_lines > 50) sf.is_stub = false;
         }
     }
 
@@ -535,74 +596,7 @@ public:
         std::set<std::string> matched_sources;
         std::set<std::string> matched_targets;
 
-        // PRIORITY 1: Match by "// port-lint: source" header (most reliable)
-        // This is explicit provenance tracking from port_linter.py
-        std::vector<std::tuple<float, std::string, std::string>> port_lint_candidates;
-        
-        for (const auto& [tgt_path, tgt_file] : target.files) {
-            if (tgt_file.port_lint_source.empty()) continue;
-            
-            // port_lint_source is like: "core/src/codex.rs"
-            // Find the source file with this relative path
-            for (const auto& [src_path, src_file] : source.files) {
-                float match_score = 0.0f;
-                
-                // Check if port_lint_source matches the FULL relative path (most precise)
-                if (src_file.relative_path == tgt_file.port_lint_source) {
-                    match_score = 1.0f;  // Perfect match
-                }
-                // Check if it's a partial path match (end of path)
-                else if (src_file.relative_path.ends_with(tgt_file.port_lint_source)) {
-                    match_score = 0.95f;
-                }
-                // Check if just the filename matches
-                else if (tgt_file.port_lint_source.ends_with("/" + src_file.filename) ||
-                         tgt_file.port_lint_source == src_file.filename) {
-                    match_score = 0.8f;
-                }
-                
-                if (match_score > 0.0f) {
-                    port_lint_candidates.emplace_back(match_score, src_path, tgt_path);
-                }
-            }
-        }
-        
-        // Sort port-lint candidates by score (highest first)
-        std::sort(port_lint_candidates.begin(), port_lint_candidates.end(),
-            [](const auto& a, const auto& b) {
-                return std::get<0>(a) > std::get<0>(b);
-            });
-        
-        // Match port-lint annotated files first
-        for (const auto& [score, src_path, tgt_path] : port_lint_candidates) {
-            if (matched_sources.count(src_path) || matched_targets.count(tgt_path)) {
-                continue;  // Already matched
-            }
-            
-            const auto& src_file = source.files.at(src_path);
-            const auto& tgt_file = target.files.at(tgt_path);
-            
-            Match m;
-            m.source_path = src_path;
-            m.target_path = tgt_path;
-            m.source_qualified = src_file.qualified_name;
-            m.target_qualified = tgt_file.qualified_name;
-            m.similarity = 0.0f;
-            m.source_dependents = src_file.dependent_count;
-            m.target_dependents = tgt_file.dependent_count;
-            m.source_lines = src_file.line_count;
-            m.target_lines = tgt_file.line_count;
-            m.todo_count = tgt_file.todos.size();
-            m.lint_count = tgt_file.lint_errors.size();
-            m.is_stub = tgt_file.is_stub;
-            m.matched_by_header = true;  // port-lint counts as header match
-            
-            matches.push_back(m);
-            matched_sources.insert(src_path);
-            matched_targets.insert(tgt_path);
-        }
-
-        // PRIORITY 2: Match by "Transliterated from:" header (legacy, for older ports)
+        // First pass: Match by "Transliterated from:" header
         // Target files reference source files, so look in target for headers
         // Store candidates with scores for best matching
         std::vector<std::tuple<float, std::string, std::string>> header_candidates;
@@ -618,9 +612,10 @@ public:
                 if (tgt_file.transliterated_from.find(src_file.relative_path) != std::string::npos) {
                     match_score = 1.0f;  // Full path match
                 }
-                // Check if transliterated_from ends with the filename (good match)
-                else if (tgt_file.transliterated_from.find("/" + src_file.filename) != std::string::npos ||
-                         tgt_file.transliterated_from.ends_with(src_file.filename)) {
+                // Check if transliterated_from ends with the EXACT filename (not substring)
+                // Use ends_with to avoid Flow.kt matching StateFlow.kt
+                else if (tgt_file.transliterated_from.ends_with("/" + src_file.filename) ||
+                         tgt_file.transliterated_from == src_file.filename) {
                     // Also verify directory context matches
                     std::string tgt_dir = tgt_file.qualified_name;
                     std::string src_dir = src_file.qualified_name;
@@ -635,8 +630,9 @@ public:
                         match_score = 0.5f;  // Just filename match, different directory
                     }
                 }
-                // Loose check - transliterated_from contains stem (weakest)
-                else if (tgt_file.transliterated_from.find("/" + src_file.stem + ".") != std::string::npos) {
+                // Loose check - transliterated_from ends with stem (stricter than find)
+                else if (tgt_file.transliterated_from.ends_with("/" + src_file.stem + ".kt") ||
+                         tgt_file.transliterated_from.ends_with("/" + src_file.stem + ".rs")) {
                     match_score = 0.3f;  // Stem found but not as confident
                 }
 
@@ -771,18 +767,22 @@ public:
 
         for (auto& m : matches) {
             try {
-                std::string src_path = source.root_path + "/" + m.source_path;
-                std::string tgt_path = target.root_path + "/" + m.target_path;
+                const auto& src_file = source.files.at(m.source_path);
+                const auto& tgt_file = target.files.at(m.target_path);
 
-                auto src_tree = parser.parse_file(src_path, string_to_language(source.language));
-                auto tgt_tree = parser.parse_file(tgt_path, string_to_language(target.language));
+                auto src_tree = parser.parse_file(src_file.paths, string_to_language(source.language));
+                auto tgt_tree = parser.parse_file(tgt_file.paths, string_to_language(target.language));
+
+                // Normalize ASTs: Flatten namespaces/packages to reduce structural noise
+                if (src_tree) src_tree->flatten_node_type(82);
+                if (tgt_tree) tgt_tree->flatten_node_type(82);
 
                 m.similarity = ASTSimilarity::combined_similarity(
                     src_tree.get(), tgt_tree.get());
 
                 // Extract documentation statistics
-                auto src_docs = parser.extract_comments_from_file(src_path, string_to_language(source.language));
-                auto tgt_docs = parser.extract_comments_from_file(tgt_path, string_to_language(target.language));
+                auto src_docs = parser.extract_comments_from_file(src_file.paths, string_to_language(source.language));
+                auto tgt_docs = parser.extract_comments_from_file(tgt_file.paths, string_to_language(target.language));
 
                 m.source_doc_lines = src_docs.total_doc_lines;
                 m.target_doc_lines = tgt_docs.total_doc_lines;
