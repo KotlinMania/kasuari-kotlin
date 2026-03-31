@@ -159,6 +159,24 @@ data class Strength(private val value: Double) : Comparable<Strength> {
      */
     fun value(): Double = value
 
+    /** Add two strengths together, clipping the result to the legal range. */
+    fun add(rhs: Strength): Strength = new(value + rhs.value)
+
+    /** Subtract one strength from another, clipping the result to the legal range. */
+    fun sub(rhs: Strength): Strength = new(value - rhs.value)
+
+    /** Multiply a strength by a scalar, clipping the result to the legal range. */
+    fun mulF64(rhs: Double): Strength = new(value * rhs)
+
+    /** Multiply a strength by a scalar, clipping the result to the legal range. */
+    fun mulF32(rhs: Float): Strength = new(value * rhs.toDouble())
+
+    /** Divide a strength by a scalar, clipping the result to the legal range. */
+    fun divF64(rhs: Double): Strength = new(value / rhs)
+
+    /** Divide a strength by a scalar, clipping the result to the legal range. */
+    fun divF32(rhs: Float): Strength = new(value / rhs.toDouble())
+
     override fun compareTo(other: Strength): Int = value.compareTo(other.value)
 }
 
@@ -168,32 +186,32 @@ data class Strength(private val value: Double) : Comparable<Strength> {
 
 /** Add two strengths together, clipping the result to the legal range */
 operator fun Strength.plus(rhs: Strength): Strength =
-    Strength.new(this.value() + rhs.value())
+    this.add(rhs)
 
 /** Subtract one strength from another, clipping the result to the legal range */
 operator fun Strength.minus(rhs: Strength): Strength =
-    Strength.new(this.value() - rhs.value())
+    this.sub(rhs)
 
 /** Multiply a strength by a scalar, clipping the result to the legal range */
 operator fun Strength.times(rhs: Double): Strength =
-    Strength.new(this.value() * rhs)
+    this.mulF64(rhs)
 
 /** Multiply a scalar by a strength, clipping the result to the legal range */
 operator fun Double.times(rhs: Strength): Strength =
-    Strength.new(this * rhs.value())
+    rhs.mulF64(this)
 
 /** Multiply a strength by a scalar (Float), clipping the result to the legal range */
 operator fun Strength.times(rhs: Float): Strength =
-    Strength.new(this.value() * rhs.toDouble())
+    this.mulF32(rhs)
 
 /** Multiply a scalar (Float) by a strength, clipping the result to the legal range */
 operator fun Float.times(rhs: Strength): Strength =
-    Strength.new(this.toDouble() * rhs.value())
+    rhs.mulF32(this)
 
 /** Divide a strength by a scalar, clipping the result to the legal range */
 operator fun Strength.div(rhs: Double): Strength =
-    Strength.new(this.value() / rhs)
+    this.divF64(rhs)
 
 /** Divide a strength by a scalar (Float), clipping the result to the legal range */
 operator fun Strength.div(rhs: Float): Strength =
-    Strength.new(this.value() / rhs.toDouble())
+    this.divF32(rhs)
