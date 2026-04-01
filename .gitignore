@@ -21,3 +21,4 @@ port_status_report.md
 high_priority_ports.md
 NEXT_ACTIONS.md
 .gradle/buildOutputCleanup/buildOutputCleanup.lock
+.gradle/buildOutputCleanup/cache.properties
