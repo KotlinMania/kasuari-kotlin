@@ -1,6 +1,7 @@
 import com.vanniktech.maven.publish.SonatypeHost
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.plugin.mpp.apple.XCFramework
+import org.jetbrains.kotlin.gradle.targets.native.tasks.KotlinNativeTest
 
 plugins {
     kotlin("multiplatform") version "2.3.0"
@@ -25,10 +26,8 @@ if (!licenseFile.exists()) {
         """.trimIndent()
     )
 }
-val localProperties: File? = rootProject.file("local.properties")
-if (!localProperties?.exists()!!) {
-    localProperties.writeText("sdk.dir=${sdkDir.absolutePath}")
-}
+val localProperties: File = rootProject.file("local.properties")
+localProperties.writeText("sdk.dir=${sdkDir.absolutePath}")
 
 kotlin {
     applyDefaultHierarchyTemplate()
@@ -98,6 +97,15 @@ kotlin {
         namespace = "io.github.kotlinmania.kasuari"
         compileSdk = 34
         minSdk = 24
+    }
+}
+
+val enableIosSimulatorTests =
+    providers.gradleProperty("enableIosSimulatorTests").map { it.toBoolean() }.orElse(false)
+
+tasks.withType<KotlinNativeTest>().configureEach {
+    if (!enableIosSimulatorTests.get() && (name == "iosX64Test" || name == "iosSimulatorArm64Test")) {
+        enabled = false
     }
 }
 

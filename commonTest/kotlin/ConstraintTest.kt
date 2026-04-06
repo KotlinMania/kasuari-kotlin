@@ -1,3 +1,4 @@
+// port-lint: tests constraint.rs
 package kasuari
 
 import kotlin.test.Test

@@ -16,6 +16,12 @@ local.properties
 /tools/ast_distance/tasks.json
 /tools/ast_distance/tasks.json.lock
 
+# Local task scratch files (should never be committed)
+tasks.json
+tasks.json.lock
+.cache/
+kotlin-js-store/
+
 # Generated port reports
 port_status_report.md
 high_priority_ports.md
