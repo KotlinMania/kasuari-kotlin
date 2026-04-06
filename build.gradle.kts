@@ -27,7 +27,8 @@ if (!licenseFile.exists()) {
     )
 }
 val localProperties: File = rootProject.file("local.properties")
-localProperties.writeText("sdk.dir=${sdkDir.absolutePath}")
+val sdkDirPropertyValue = sdkDir.absolutePath.replace("\\", "/")
+localProperties.writeText("sdk.dir=$sdkDirPropertyValue")
 
 kotlin {
     applyDefaultHierarchyTemplate()
