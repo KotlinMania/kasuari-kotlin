@@ -1,3 +1,4 @@
+// port-lint: source expression.rs
 package kasuari
 
 /**
@@ -57,6 +58,12 @@ data class Expression(
     /** The constant in the expression. */
     var constant: Double
 ) {
+    fun neg(): Expression =
+        Expression(
+            terms.map { it.neg() }.toMutableList(),
+            if (constant == 0.0) 0.0 else -constant
+        )
+
     /**
      * Creates a copy of this expression with an independent mutable terms list.
      *
@@ -94,6 +101,9 @@ data class Expression(
         fun fromConstant(constant: Double): Expression =
             Expression(mutableListOf(), constant)
 
+        fun from(constant: Double): Expression =
+            fromConstant(constant)
+
         /**
          * Constructs an expression from a single term.
          *
@@ -106,6 +116,9 @@ data class Expression(
          */
         fun fromTerm(term: Term): Expression =
             Expression(mutableListOf(term), 0.0)
+
+        fun from(term: Term): Expression =
+            fromTerm(term)
 
         /**
          * Constructs an expression from a list of terms.
@@ -158,6 +171,12 @@ data class Expression(
          */
         fun fromVariable(variable: Variable): Expression =
             Expression(mutableListOf(Term.fromVariable(variable)), 0.0)
+
+        fun from(variable: Variable): Expression =
+            fromVariable(variable)
+
+        fun fromIter(terms: Iterable<Term>): Expression =
+            fromTerms(terms)
     }
 }
 
@@ -167,10 +186,7 @@ data class Expression(
 
 /** Negates this expression, producing a new [Expression] with all terms and constant negated. */
 operator fun Expression.unaryMinus(): Expression =
-    Expression(
-        terms.map { -it }.toMutableList(),
-        if (constant == 0.0) 0.0 else -constant  // Normalize -0.0 to 0.0
-    )
+    this.neg()
 
 /** Multiplies this expression by a scalar, producing a new [Expression]. */
 operator fun Expression.times(rhs: Double): Expression {

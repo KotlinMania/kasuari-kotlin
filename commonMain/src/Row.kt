@@ -1,3 +1,4 @@
+// port-lint: source row.rs
 package kasuari
 
 /**
@@ -89,6 +90,8 @@ internal class Row(
  * depending on their role in the algorithm.
  */
 internal data class Symbol(val id: Int, val kind: SymbolKind) : Comparable<Symbol> {
+    fun kind(): SymbolKind = kind
+
     override fun compareTo(other: Symbol): Int {
         val idCmp = id.compareTo(other.id)
         return if (idCmp != 0) idCmp else kind.compareTo(other.kind)
@@ -128,4 +131,3 @@ internal fun nearZero(value: Double): Boolean {
         value < EPS
     }
 }
-

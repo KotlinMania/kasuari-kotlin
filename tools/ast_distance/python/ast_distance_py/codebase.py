@@ -400,8 +400,6 @@ class CodebaseComparator:
             self.source_doc_comments: int = 0
             self.target_doc_comments: int = 0
             self.doc_similarity: float = 0.0
-            self.doc_coverage: float = 1.0
-            self.doc_weighted: float = 0.0
 
         def doc_gap_ratio(self) -> float:
             if self.source_doc_lines == 0:
@@ -639,10 +637,7 @@ class CodebaseComparator:
         for i, source_func in enumerate(source_functions):
             for j, target_func in enumerate(target_functions):
                 sim = 0.0
-                # Guardrail: treat stub markers as a failure only when they appear in the
-                # target function but not in the source function. Rust source may contain
-                # legitimate TODO/FIXME comments without implying an incomplete port.
-                if not (target_func.has_stub_markers and not source_func.has_stub_markers):
+                if not source_func.has_stub_markers and not target_func.has_stub_markers:
                     sim = ASTSimilarity.combined_similarity_with_content(
                         source_func.body_tree,
                         target_func.body_tree,
@@ -755,8 +750,6 @@ class CodebaseComparator:
                 m.source_doc_comments = src_docs.doc_comment_count
                 m.target_doc_comments = tgt_docs.doc_comment_count
                 m.doc_similarity = src_docs.doc_cosine_similarity(tgt_docs)
-                m.doc_coverage = src_docs.doc_line_coverage_capped(tgt_docs)
-                m.doc_weighted = 0.5 * m.doc_similarity + 0.5 * m.doc_coverage
                 
             except Exception:
                 m.similarity = -1.0

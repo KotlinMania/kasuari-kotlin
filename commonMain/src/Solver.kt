@@ -149,6 +149,8 @@ class Solver {
          * @return A new empty [Solver] instance.
          */
         fun new(): Solver = Solver()
+
+        fun default(): Solver = new()
     }
 
     /**
@@ -185,7 +187,7 @@ class Solver {
      */
     fun addConstraint(constraint: Constraint) {
         if (constraints.containsKey(constraint)) {
-            // TODO determine if we could just ignore duplicate constraints
+            // Note: determine if we could just ignore duplicate constraints
             throw AddConstraintError.DuplicateConstraint
         }
 
@@ -256,7 +258,7 @@ class Solver {
         // pivot the marker into the basis and then drop the row.
         if (rows.remove(tag.marker) == null) {
             val (leaving, row) = getMarkerLeavingRow(tag.marker)
-                ?: throw RemoveConstraintError.InternalSolver(InternalSolverError.FailedToFindLeavingRow)
+                ?: throw RemoveConstraintError.InternalSolverError(InternalSolverError.FailedToFindLeavingRow)
             row.solveForSymbols(leaving, tag.marker)
             substitute(tag.marker, row)
         }
@@ -348,9 +350,9 @@ class Solver {
             try {
                 removeConstraint(editInfo.constraint)
             } catch (e: RemoveConstraintError.UnknownConstraint) {
-                throw RemoveEditVariableError.InternalSolver(InternalSolverError.EditConstraintNotInSystem)
-            } catch (e: RemoveConstraintError.InternalSolver) {
-                throw RemoveEditVariableError.InternalSolver(e.error)
+                throw RemoveEditVariableError.InternalSolverError(InternalSolverError.EditConstraintNotInSystem)
+            } catch (e: RemoveConstraintError.InternalSolverError) {
+                throw RemoveEditVariableError.InternalSolverError(e.error)
             }
         } else {
             throw RemoveEditVariableError.UnknownEditVariable

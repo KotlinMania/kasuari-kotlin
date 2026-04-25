@@ -1,12 +1,7 @@
 """Task manager for coordinating swarm agents (Python implementation).
 
-The Python CLI (`ast_distance.cli`) expects this module to provide:
-  - `PortTask` as a keyword-constructible type (dataclass)
-  - `TaskManager.get_stats()` returning a dict
-  - `TaskManager.format_assignment()` returning printable instructions
-
-Older transliterations matched the C++ header shape but drifted from the Python CLI.
-This module is the source of truth for the Python package.
+NOTE: This module is kept in sync with `ast_distance.task_manager` because both
+packages exist in this repo and have historically been used interchangeably.
 """
 
 from __future__ import annotations
@@ -22,8 +17,6 @@ from typing import Any, Optional
 
 
 class TaskStatus(Enum):
-    """Task status for porting work items."""
-
     PENDING = "pending"
     ASSIGNED = "assigned"
     COMPLETED = "completed"
@@ -31,8 +24,6 @@ class TaskStatus(Enum):
 
 
 class FileLock:
-    """Advisory file lock (flock) scoped to this object lifetime."""
-
     def __init__(self, path: str):
         self.fd = -1
         self.locked = False
@@ -64,8 +55,6 @@ class FileLock:
 
 @dataclass
 class PortTask:
-    """A single porting task entry in `tasks.json`."""
-
     source_path: str
     source_qualified: str
     target_path: str
@@ -134,8 +123,6 @@ class PortTask:
 
 
 class TaskManager:
-    """Task file manager for coordinating swarm agents."""
-
     def __init__(self, task_file: str):
         self.task_file_path: str = task_file
         self.agents_md_path: str = ""

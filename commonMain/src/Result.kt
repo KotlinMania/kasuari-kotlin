@@ -268,7 +268,7 @@ sealed class Result<out T, out E> {
  *     is Result.Err -> when (result.error) {
  *         is AddConstraintError.DuplicateConstraint -> println("Already exists")
  *         is AddConstraintError.UnsatisfiableConstraint -> println("Conflicts")
- *         is AddConstraintError.InternalSolver -> println("Internal error")
+ *         is AddConstraintError.InternalSolverError -> println("Internal error")
  *     }
  * }
  * ```

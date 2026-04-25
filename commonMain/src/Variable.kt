@@ -1,3 +1,4 @@
+// port-lint: source variable.rs
 package kasuari
 
 import kotlin.concurrent.atomics.AtomicLong
@@ -5,44 +6,8 @@ import kotlin.concurrent.atomics.ExperimentalAtomicApi
 
 /**
  * Identifies a variable for the constraint solver.
- *
  * Each new variable is unique in the view of the solver, but copying or cloning the variable
- * produces a copy of the same variable. Variables are the fundamental building blocks of
- * constraint expressions.
- *
- * ## Creating Variables
- *
- * ```kotlin
- * val x = Variable.new()
- * val y = Variable.new()
- * // x and y are distinct variables
- * ```
- *
- * ## Building Expressions
- *
- * Variables support arithmetic operators to build constraint expressions:
- *
- * ```kotlin
- * val x = Variable.new()
- * val y = Variable.new()
- *
- * // Expressions with constants
- * val expr1 = x + 10.0      // x + 10
- * val expr2 = 2.0 * x       // 2x (returns Term)
- * val expr3 = x / 2.0       // 0.5x (returns Term)
- *
- * // Expressions with other variables
- * val expr4 = x + y         // x + y
- * val expr5 = x - y         // x - y
- *
- * // Negation
- * val negX = -x             // -x (returns Term)
- * ```
- *
- * @property id The unique identifier for this variable.
- * @see Term
- * @see Expression
- * @see Constraint
+ * produces a copy of the same variable.
  */
 @ConsistentCopyVisibility
 data class Variable internal constructor(val id: Long) : Comparable<Variable> {
@@ -50,6 +15,45 @@ data class Variable internal constructor(val id: Long) : Comparable<Variable> {
     override fun compareTo(other: Variable): Int = id.compareTo(other.id)
 
     override fun toString(): String = "Variable(id=$id)"
+
+    fun add(constant: Double): Expression =
+        Term.from(this) + constant
+
+    fun add(constant: Float): Expression =
+        Term.from(this) + constant.toDouble()
+
+    fun add(other: Variable): Expression =
+        Term.from(this) + Term.from(other)
+
+    fun add(term: Term): Expression =
+        Term.from(this) + term
+
+    fun add(expression: Expression): Expression =
+        Term.from(this) + expression
+
+    fun sub(constant: Double): Expression =
+        Term.from(this) - constant
+
+    fun sub(constant: Float): Expression =
+        Term.from(this) - constant.toDouble()
+
+    fun sub(other: Variable): Expression =
+        Term.from(this) - Term.from(other)
+
+    fun sub(term: Term): Expression =
+        Term.from(this) - term
+
+    fun sub(expression: Expression): Expression =
+        Term.from(this) - expression
+
+    fun mul(coefficient: Double): Term =
+        Term.new(this, coefficient)
+
+    fun mul(coefficient: Float): Term =
+        Term.new(this, coefficient.toDouble())
+
+    fun neg(): Term =
+        -Term.from(this)
 
     companion object {
         @OptIn(ExperimentalAtomicApi::class)
@@ -66,91 +70,68 @@ data class Variable internal constructor(val id: Long) : Comparable<Variable> {
         @OptIn(ExperimentalAtomicApi::class)
         fun new(): Variable = Variable(nextId.fetchAndAdd(1))
 
+        fun default(): Variable = new()
+
         /**
          * Creates a variable with a specific ID. For testing purposes only.
          */
         internal fun fromId(id: Long): Variable = Variable(id)
     }
+
+    operator fun plus(constant: Double): Expression = add(constant)
+    operator fun plus(constant: Float): Expression = add(constant)
+    operator fun plus(other: Variable): Expression = add(other)
+    operator fun plus(term: Term): Expression = add(term)
+    operator fun plus(expression: Expression): Expression = add(expression)
+
+    operator fun unaryMinus(): Term = neg()
+
+    operator fun minus(constant: Double): Expression = sub(constant)
+    operator fun minus(constant: Float): Expression = sub(constant)
+    operator fun minus(other: Variable): Expression = sub(other)
+    operator fun minus(term: Term): Expression = sub(term)
+    operator fun minus(expression: Expression): Expression = sub(expression)
+
+    operator fun times(coefficient: Double): Term = mul(coefficient)
+    operator fun times(coefficient: Float): Term = mul(coefficient)
+
+    operator fun div(coefficient: Double): Term = Term.new(this, 1.0 / coefficient)
+    operator fun div(coefficient: Float): Term = Term.new(this, 1.0 / coefficient.toDouble())
 }
 
 // ============================================================================
 // Operator overloading for Variable
 // ============================================================================
 
-/** Adds a constant to this variable, producing an [Expression]. */
-operator fun Variable.plus(constant: Double): Expression = Term.from(this) + constant
+operator fun Double.plus(variable: Variable): Expression =
+    Term.from(variable) + this
 
-/** Adds a variable to this constant, producing an [Expression]. */
-operator fun Double.plus(variable: Variable): Expression = Term.from(variable) + this
+operator fun Float.plus(variable: Variable): Expression =
+    Term.from(variable) + this.toDouble()
 
-/** Adds a constant (Float) to this variable, producing an [Expression]. */
-operator fun Variable.plus(constant: Float): Expression = Term.from(this) + constant.toDouble()
+operator fun Double.minus(variable: Variable): Expression =
+    this - Term.from(variable)
 
-/** Adds a variable to this constant (Float), producing an [Expression]. */
-operator fun Float.plus(variable: Variable): Expression = Term.from(variable) + this.toDouble()
+operator fun Float.minus(variable: Variable): Expression =
+    this.toDouble() - Term.from(variable)
 
-/** Adds two variables together, producing an [Expression]. */
-operator fun Variable.plus(other: Variable): Expression = Term.from(this) + Term.from(other)
+operator fun Double.times(variable: Variable): Term =
+    Term.new(variable, this)
 
-/** Adds a [Term] to this variable, producing an [Expression]. */
-operator fun Variable.plus(term: Term): Expression = Term.from(this) + term
+operator fun Float.times(variable: Variable): Term =
+    Term.new(variable, this.toDouble())
 
-/** Adds a [Variable] to this term, producing an [Expression]. */
-operator fun Term.plus(variable: Variable): Expression = this + Term.from(variable)
+operator fun Term.plus(variable: Variable): Expression =
+    this + Term.from(variable)
 
-/** Adds an [Expression] to this variable, producing an [Expression]. */
-operator fun Variable.plus(expression: Expression): Expression = Term.from(this) + expression
+operator fun Expression.plus(variable: Variable): Expression =
+    this + Term.from(variable)
 
-/** Adds a [Variable] to this expression, producing an [Expression]. */
-operator fun Expression.plus(variable: Variable): Expression = this + Term.from(variable)
+operator fun Term.minus(variable: Variable): Expression =
+    this - Term.from(variable)
 
-/** Negates this variable, producing a [Term] with coefficient -1. */
-operator fun Variable.unaryMinus(): Term = -Term.from(this)
-
-/** Subtracts a constant from this variable, producing an [Expression]. */
-operator fun Variable.minus(constant: Double): Expression = Term.from(this) - constant
-
-/** Subtracts a variable from this constant, producing an [Expression]. */
-operator fun Double.minus(variable: Variable): Expression = this - Term.from(variable)
-
-/** Subtracts a constant (Float) from this variable, producing an [Expression]. */
-operator fun Variable.minus(constant: Float): Expression = Term.from(this) - constant.toDouble()
-
-/** Subtracts a variable from this constant (Float), producing an [Expression]. */
-operator fun Float.minus(variable: Variable): Expression = this.toDouble() - Term.from(variable)
-
-/** Subtracts another variable from this variable, producing an [Expression]. */
-operator fun Variable.minus(other: Variable): Expression = Term.from(this) - Term.from(other)
-
-/** Subtracts a [Term] from this variable, producing an [Expression]. */
-operator fun Variable.minus(term: Term): Expression = Term.from(this) - term
-
-/** Subtracts a [Variable] from this term, producing an [Expression]. */
-operator fun Term.minus(variable: Variable): Expression = this - Term.from(variable)
-
-/** Subtracts an [Expression] from this variable, producing an [Expression]. */
-operator fun Variable.minus(expression: Expression): Expression = Term.from(this) - expression
-
-/** Subtracts a [Variable] from this expression, producing an [Expression]. */
-operator fun Expression.minus(variable: Variable): Expression = this - Term.from(variable)
-
-/** Multiplies this variable by a coefficient, producing a [Term]. */
-operator fun Variable.times(coefficient: Double): Term = Term(this, coefficient)
-
-/** Multiplies a coefficient by this variable, producing a [Term]. */
-operator fun Double.times(variable: Variable): Term = Term(variable, this)
-
-/** Multiplies this variable by a coefficient (Float), producing a [Term]. */
-operator fun Variable.times(coefficient: Float): Term = Term(this, coefficient.toDouble())
-
-/** Multiplies a coefficient (Float) by this variable, producing a [Term]. */
-operator fun Float.times(variable: Variable): Term = Term(variable, this.toDouble())
-
-/** Divides this variable by a coefficient, producing a [Term]. */
-operator fun Variable.div(coefficient: Double): Term = Term(this, 1.0 / coefficient)
-
-/** Divides this variable by a coefficient (Float), producing a [Term]. */
-operator fun Variable.div(coefficient: Float): Term = Term(this, 1.0 / coefficient.toDouble())
+operator fun Expression.minus(variable: Variable): Expression =
+    this - Term.from(variable)
 
 /** Adds a [Variable] to this expression in place. */
 operator fun Expression.plusAssign(variable: Variable) {

@@ -1,3 +1,4 @@
+// port-lint: source term.rs
 package kasuari
 
 /**
@@ -54,6 +55,9 @@ data class Term(
     val variable: Variable,
     var coefficient: Double
 ) {
+    fun neg(): Term =
+        Term(variable, -coefficient)
+
     companion object {
         /**
          * Constructs a new [Term] from a variable and a coefficient.
@@ -136,7 +140,7 @@ operator fun Term.divAssign(rhs: Float) {
 
 /** Negates this term, producing a new [Term] with negated coefficient. */
 operator fun Term.unaryMinus(): Term =
-    Term(this.variable, -this.coefficient)
+    this.neg()
 
 /** Adds a constant to this term, producing an [Expression]. */
 operator fun Term.plus(rhs: Double): Expression =

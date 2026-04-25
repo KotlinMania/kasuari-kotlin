@@ -100,75 +100,23 @@ class IdentifierStats:
         
         Faithful transliteration of canonicalize() from ast_parser.hpp:51-114.
         """
-        # First: lowercase + strip underscores.
-        #
-        # NOTE: Identifier overlap is the dominant signal for Rust→Kotlin ports. Kotlin ports often
-        # introduce "plumbing" identifiers (stdlib helpers, Result helpers, package/import path
-        # components, and tiny temp vars) which can cause false negatives even for faithful
-        # transliterations. We normalize or ignore a small, explicit set of such identifiers to keep
-        # the similarity metric focused on semantic names.
+        # First: lowercase + strip underscores
         result = "".join(ch.lower() for ch in name if ch != "_")
 
-        # Low-signal tokens to ignore entirely (do not count toward canonical overlap).
-        #
-        # These are intentionally explicit (not heuristic) to avoid hiding real drift.
-        ignore = {
-            # Explicit receiver tokens (Rust uses `self` heavily; Kotlin often omits `this`).
-            "self",
-            "this",
-            # Rust path components / package/import noise.
-            "crate",
-            "io",
-            "github",
-            "com",
-            "kotlin",
-            "kotlinmania",
-            "starlarkkotlin",
-            # Kotlin keyword-ish noise that can appear as identifiers in some parses.
-            "val",
-            "var",
-            "true",
-            "false",
-            # Very common tiny temp vars introduced by tuple destructuring / iterator glue.
-            "xk",
-            "xv",
-            "xy",
-            "yk",
-            "yv",
-            # Iterator/local glue frequently introduced by Kotlin ports (keep explicit).
-            "xsiter",
-            "xsbasics",
-            "rest",
-            "merged",
-            "minlen",
-            "ch",
-            "sb",
-        }
-        if result in ignore:
-            return ""
-
-        # Cross-language equivalents (applied after lowering).
+        # Cross-language equivalents (applied after lowering)
         equivalents = {
-            # Keywords / visibility
+            # Keywords
+            "self": "this",
+            "crate": "",       # Rust path component, no Kotlin equivalent
             "super": "super",
-            # Visibility: Rust `pub(crate)` most closely matches Kotlin `internal`
-            "internal": "public",
             # Collections
             "vec": "list",
             "mutablelist": "list",
             "arraylist": "list",
-            "mutablelistof": "list",
-            "listof": "list",
-            "tomutablelist": "list",
-            "tolist": "list",
             "hashmap": "map",
             "mutablemap": "map",
-            "mutablemapof": "map",
-            "mapof": "map",
             "hashset": "set",
             "mutableset": "set",
-            "mutablesetof": "set",
-            "setof": "set",
             "btreemap": "map",
             "btreeset": "set",
             # Types
@@ -188,78 +136,33 @@ class IdentifierStats:
             "f32": "float",
             "f64": "double",
             "bool": "boolean",
-            "kclass": "typeid",
-            "pair": "tuple",
-            "triple": "tuple",
-            "unit": "void",
             # Error handling
             "result": "result",
-            "freezeresult": "result",
             "err": "error",
             "ok": "success",
-            "failure": "error",
-            # Kotlin Result helper names often appear in faithful ports.
-            "getorthrow": "unwrap",
-            "exceptionornull": "error",
-            "issuccess": "ok",
-            "isfailure": "err",
-            # Rust trait methods -> Kotlin equivalents
-            "fmt": "tostring",  # Display::fmt -> toString
-            "eq": "equals",  # PartialEq::eq -> equals
-            "partialeq": "equals",
-            "cmp": "compareto",  # Ord::cmp -> compareTo
-            "partialcmp": "compareto",  # PartialOrd::partial_cmp -> compareTo
-            "hash": "hashcode",  # Hash::hash -> hashCode
-            "clone": "copy",  # Clone::clone -> copy (data class)
-            "default": "invoke",  # Default::default -> companion invoke
-            "fromstr": "parse",  # FromStr -> parse
-            "intoiter": "iterator",  # IntoIterator::into_iter -> iterator
-            "intoiterator": "iterator",
-            "hasnext": "next",
-            "next": "next",  # Iterator::next (same name)
-            "serialize": "serialize",
-            "deserialize": "deserialize",
-            # Kotlin string builders are commonly used where Rust uses `String`.
-            "stringbuilder": "string",
-            "buildstring": "string",
-            "append": "push",
-            "substring": "split",
-            "deref": "get",  # Deref::deref -> get/value
-            "drop": "close",  # Drop::drop -> close/Closeable
-            "freeze": "freeze",  # project-specific
-            "trace": "trace",  # project-specific
             # Common prefixes
             "fn": "fun",
             "impl": "class",
             "pub": "public",
             "mut": "var",
             "let": "val",
-            # Common operations in ports
-            "len": "size",
-            "size": "len",
-            "push": "add",
-            "add": "push",
-            # List slice adapters often differ by language surface
-            "slice": "asslice",
-            # Kotlin toString vs Rust format!/Debug
-            "tostring": "display",
-            "formatdebug": "format",
         }
 
-        return equivalents.get(result, result)
+        if result in equivalents:
+            return equivalents[result]
+
+        return result
 
     def add_identifier(self, name: str) -> None:
         """Add an identifier to the statistics.
         
         Faithful transliteration of add_identifier() from ast_parser.hpp:116-122.
         """
-        if not name:
-            return
-        self.identifier_freq[name] = self.identifier_freq.get(name, 0) + 1
-        c = self.canonicalize(name)
-        if c:
+        if name:
+            self.identifier_freq[name] = self.identifier_freq.get(name, 0) + 1
+            c = self.canonicalize(name)
             self.canonical_freq[c] = self.canonical_freq.get(c, 0) + 1
-        self.total_identifiers += 1
+            self.total_identifiers += 1
 
     @staticmethod
     def _cosine_similarity_of(a: dict[str, int], b: dict[str, int]) -> float:
@@ -360,22 +263,6 @@ class CommentStats:
         if self.total_comment_lines == 0:
             return 0.0
         return self.total_doc_lines / self.total_comment_lines
-
-    def doc_line_coverage_capped(self, other: CommentStats) -> float:
-        """Asymmetric doc amount coverage (target/source doc lines, capped at 1.0).
-
-        If `other` has more docs than `self`, treat as full coverage (1.0) rather than a penalty.
-        """
-        if self.total_doc_lines <= 0:
-            return 1.0
-        return min(1.0, other.total_doc_lines / self.total_doc_lines)
-
-    def doc_line_balance(self, other: CommentStats) -> float:
-        """Symmetric doc amount balance (min/max of doc lines)."""
-        max_lines = max(self.total_doc_lines, other.total_doc_lines)
-        if max_lines <= 0:
-            return 1.0
-        return min(self.total_doc_lines, other.total_doc_lines) / max_lines
 
     def doc_cosine_similarity(self, other: CommentStats) -> float:
         """Compute cosine similarity of doc word frequencies.
