@@ -265,7 +265,6 @@ class Solver {
 
         // Optimizing after each constraint is removed ensures that the
         // solver remains consistent. It makes the solver api easier to
-        // use at a small tradeoff for speed.
         optimize(objective)
 
         // Check for and decrease the reference count for variables referenced by the constraint
