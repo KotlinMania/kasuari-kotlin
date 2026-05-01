@@ -28,4 +28,5 @@ high_priority_ports.md
 NEXT_ACTIONS.md
 .gradle/buildOutputCleanup/buildOutputCleanup.lock
 .gradle/buildOutputCleanup/cache.properties
-commonMain/src/.DS_Store
+/**/.DS_Store
+.DS_Store
