@@ -20,7 +20,10 @@ local.properties
 tasks.json
 tasks.json.lock
 .cache/
-kotlin-js-store/
+kotlin-js-store/*
+!kotlin-js-store/yarn.lock
+!kotlin-js-store/wasm/
+!kotlin-js-store/wasm/yarn.lock
 
 # Generated port reports
 port_status_report.md
