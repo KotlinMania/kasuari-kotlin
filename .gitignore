@@ -25,6 +25,10 @@ kotlin-js-store/*
 !kotlin-js-store/wasm/
 !kotlin-js-store/wasm/yarn.lock
 
+# TypeScript tool dependencies
+/tools/ast_distance/typescript/node_modules/
+/tools/ast_distance/typescript/dist/
+
 # Generated port reports
 port_status_report.md
 high_priority_ports.md
