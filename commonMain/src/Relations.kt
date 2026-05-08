@@ -45,9 +45,6 @@ sealed class WeightedRelation(val strength: Strength) {
     }
 }
 
-/**
- * Direct transliteration of Rust's `BitOr<WeightedRelation>` sugar.
- */
 infix fun Double.bitor(rhs: WeightedRelation): PartialConstraint =
     PartialConstraint.new(Expression.fromConstant(this), rhs)
 
