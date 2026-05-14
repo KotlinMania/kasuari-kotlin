@@ -1,3 +1,4 @@
+// port-lint: ignore — Kotlin-side result wrapper; Rust uses stdlib `Result` with no kasuari source.
 package kasuari
 
 /**

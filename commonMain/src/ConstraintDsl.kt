@@ -1,3 +1,4 @@
+// port-lint: ignore — Kotlin-side DSL helpers; no kasuari Rust source file.
 package kasuari
 
 /**
