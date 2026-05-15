@@ -81,8 +81,6 @@ data class Term(
         /**
          * Converts a [Variable] to a [Term] with coefficient 1.0.
          *
-         * This is equivalent to Rust's `impl From<Variable> for Term`.
-         *
          * @param variable The variable to convert.
          * @return A new [Term] with coefficient 1.0.
          */
@@ -227,8 +225,6 @@ operator fun Expression.minusAssign(rhs: Term) {
 
 /**
  * Converts this [Term] to an [Expression].
- *
- * This is equivalent to Rust's `impl From<Term> for Expression`.
  *
  * @return An [Expression] containing only this term.
  */

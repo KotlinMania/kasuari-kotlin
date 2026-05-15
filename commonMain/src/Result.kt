@@ -4,8 +4,8 @@ package kasuari
 /**
  * A result type that represents either success ([Ok]) or failure ([Err]).
  *
- * This type mirrors Rust's `Result<T, E>` and provides an alternative to exception-based
- * error handling for users who prefer explicit error handling.
+ * Provides an alternative to exception-based error handling for callers who prefer
+ * explicit error handling.
  *
  * ## Creating Results
  *

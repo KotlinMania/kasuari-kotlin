@@ -136,8 +136,6 @@ data class Expression(
         /**
          * Constructs an expression from an iterable of terms.
          *
-         * This is equivalent to Rust's `impl FromIterator<Term> for Expression`.
-         *
          * ```kotlin
          * val expr = Expression.fromTerms(terms.filter { it.coefficient != 0.0 })
          * ```
@@ -346,8 +344,6 @@ operator fun Expression.minusAssign(rhs: Expression) {
 
 /**
  * Converts this [Double] to an [Expression] (constant-only expression).
- *
- * This is equivalent to Rust's `impl From<f64> for Expression`.
  *
  * @return An [Expression] with no terms and this value as the constant.
  */

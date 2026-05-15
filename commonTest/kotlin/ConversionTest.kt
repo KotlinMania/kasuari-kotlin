@@ -4,7 +4,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 /**
- * Tests for type conversion extensions (equivalent to Rust's From<T> trait implementations).
+ * Tests for type conversion extensions between [Variable], [Term], and [Expression].
  */
 class ConversionTest {
 
@@ -100,7 +100,6 @@ class ConversionTest {
     fun expressionFromMappedCollection() {
         val variables = listOf(Variable.new(), Variable.new(), Variable.new())
 
-        // This is the idiomatic Kotlin pattern equivalent to Rust's FromIterator
         val expr = Expression.fromTerms(variables.map { it.toTerm() })
 
         assertEquals(3, expr.terms.size)

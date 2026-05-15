@@ -150,16 +150,12 @@ operator fun Expression.minusAssign(variable: Variable) {
 /**
  * Converts this [Variable] to a [Term] with coefficient 1.0.
  *
- * This is equivalent to Rust's `impl From<Variable> for Term`.
- *
  * @return A [Term] representing this variable with coefficient 1.0.
  */
 fun Variable.toTerm(): Term = Term.fromVariable(this)
 
 /**
  * Converts this [Variable] to an [Expression].
- *
- * This is equivalent to Rust's `impl From<Variable> for Expression`.
  *
  * @return An [Expression] containing only this variable.
  */
