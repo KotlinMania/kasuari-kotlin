@@ -1,3 +1,7 @@
+import org.gradle.api.artifacts.Configuration
+import org.gradle.api.tasks.ClasspathNormalizer
+import org.gradle.api.tasks.PathSensitivity
+import org.gradle.api.tasks.JavaExec
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.plugin.mpp.apple.XCFramework
 import org.jetbrains.kotlin.gradle.targets.js.yarn.YarnRootExtension
@@ -163,6 +167,108 @@ tasks.withType<KotlinNativeTest>().configureEach {
     if (!enableIosSimulatorTests.get() && name == "iosSimulatorArm64Test") {
         enabled = false
     }
+}
+
+// ---- CodeQL Kotlin extraction task ----
+//
+// Kotlin 2.3's multiplatform compilation pipeline does not reliably route
+// through the `K2JVMCompiler.doExecute(...)` codepath that the CodeQL Java
+// agent hooks to extract Kotlin TRAP. The CodeQL workflow runs this task as a
+// single-target JVM compile of the commonMain source set so the agent hook
+// fires and the Kotlin extractor writes `*.kt.trap.gz`.
+//
+// This task is for CodeQL extraction only. The output `.class` files are not
+// published and are not part of any multiplatform target.
+
+val codeqlKotlinc: Configuration by configurations.creating {
+    description = "Kotlin compiler (CodeQL extraction target only — not published)"
+    isCanBeResolved = true
+    isCanBeConsumed = false
+}
+
+val codeqlSourceClasspath: Configuration by configurations.creating {
+    description = "Runtime classpath for CodeQL extraction of commonMain sources"
+    isCanBeResolved = true
+    isCanBeConsumed = false
+}
+
+dependencies {
+    codeqlKotlinc("org.jetbrains.kotlin:kotlin-compiler-embeddable:2.3.21")
+    codeqlSourceClasspath("org.jetbrains.kotlin:kotlin-stdlib:2.3.21")
+}
+
+tasks.register<JavaExec>("codeqlCompileJvm") {
+    description =
+        "Compile commonMain Kotlin sources with kotlinc for CodeQL Java/Kotlin extraction. " +
+            "Not part of any published artifact; intended to be wrapped by `codeql database create` " +
+            "or `github/codeql-action/init` so the extractor agent can attach and extract Kotlin TRAP."
+    group = "verification"
+
+    classpath(codeqlKotlinc)
+    mainClass.set("org.jetbrains.kotlin.cli.jvm.K2JVMCompiler")
+
+    val outDir = layout.buildDirectory.dir("classes/kotlin/codeql-jvm")
+    val sources = fileTree("commonMain/src") { include("**/*.kt") }
+    val sentinelDir = layout.buildDirectory.dir("generated/codeql-empty-source")
+    inputs.files(sources).withPathSensitivity(PathSensitivity.RELATIVE)
+    inputs.files(codeqlSourceClasspath).withNormalizer(ClasspathNormalizer::class.java)
+    outputs.dir(outDir)
+    outputs.dir(sentinelDir)
+
+    doFirst {
+        outDir.get().asFile.mkdirs()
+        val sourceFiles = sources.files.toMutableList()
+        // When commonMain has no Kotlin source, kotlinc invoked with zero
+        // source args drops to REPL mode and fails. Write a tiny placeholder
+        // under build/generated/codeql-empty-source/ so the task always runs.
+        if (sourceFiles.isEmpty()) {
+            val sentinelFile = sentinelDir.get().asFile.resolve("kasuari/codeql/_CodeqlEmptySource.kt")
+            sentinelFile.parentFile.mkdirs()
+            sentinelFile.writeText(
+                """
+                // Auto-generated. Present so codeqlCompileJvm has at least
+                // one Kotlin source to compile; replaced by real commonMain
+                // content once porting begins.
+                package kasuari.codeql
+
+                private object _CodeqlEmptySource
+
+                """.trimIndent(),
+            )
+            sourceFiles += sentinelFile
+        }
+
+        args =
+            listOf(
+                "-d",
+                outDir.get().asFile.absolutePath,
+                "-classpath",
+                codeqlSourceClasspath.asPath,
+                "-jvm-target",
+                "21",
+                "-no-stdlib", // stdlib comes via the classpath
+                "-no-reflect",
+                "-language-version",
+                "2.3",
+                "-api-version",
+                "2.3",
+            ) + sourceFiles.map { it.absolutePath }
+    }
+}
+
+tasks.register("test") {
+    group = "verification"
+    description = "Runs host-compatible test tasks for this project."
+
+    val osName = System.getProperty("os.name").lowercase()
+    val nativeTestTaskName =
+        when {
+            osName.contains("mac") -> "macosArm64Test"
+            osName.contains("windows") -> "mingwX64Test"
+            else -> "linuxX64Test"
+        }
+
+    dependsOn(tasks.named(nativeTestTaskName))
 }
 
 mavenPublishing {

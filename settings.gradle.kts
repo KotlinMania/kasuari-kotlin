@@ -4,10 +4,10 @@ pluginManagement {
         mavenCentral()
         gradlePluginPortal()
     }
-    plugins { kotlin("jvm") version "2.3.20" }
+    plugins { kotlin("multiplatform") version "2.3.21" }
 }
 
-plugins { id("org.gradle.toolchains.foojay-resolver-convention") version "0.9.0" }
+plugins { id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0" }
 
 dependencyResolutionManagement {
     repositories {
