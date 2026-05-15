@@ -256,6 +256,21 @@ tasks.register<JavaExec>("codeqlCompileJvm") {
     }
 }
 
+tasks.register("test") {
+    group = "verification"
+    description = "Runs host-compatible test tasks for this project."
+
+    val osName = System.getProperty("os.name").lowercase()
+    val nativeTestTaskName =
+        when {
+            osName.contains("mac") -> "macosArm64Test"
+            osName.contains("windows") -> "mingwX64Test"
+            else -> "linuxX64Test"
+        }
+
+    dependsOn(tasks.named(nativeTestTaskName))
+}
+
 mavenPublishing {
     publishToMavenCentral()
     signAllPublications()
