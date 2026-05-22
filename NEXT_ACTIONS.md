@@ -9,7 +9,7 @@ Based on AST analysis, here are the concrete next steps.
 - **Class/type parity:** 21/27 matched (target 35) — 77.8%
 - **Combined symbol parity:** 107/166 matched (target 247) — 64.5%
 - **Average inline-code cosine:** 0.56 (function body across 9 matched files)
-- **Average documentation cosine:** 0.73 (doc text across 9 matched files)
+- **Average documentation cosine:** 0.77 (doc text across 9 matched files)
 - **Cheat-zeroed Files:** 0
 - **Critical Issues:** 5 files with <0.60 function similarity
 
