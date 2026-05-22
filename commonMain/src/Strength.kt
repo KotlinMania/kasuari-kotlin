@@ -136,12 +136,15 @@ data class Strength(private val value: Double) : Comparable<Strength> {
     operator fun div(rhs: Float): Strength =
         divF32(rhs)
 
+    /** Compare two strengths by their underlying value. */
     fun cmp(other: Strength): Int =
         value.compareTo(other.value)
 
+    /** Compare two strengths by their underlying value, returning a negative, zero, or positive integer. */
     fun partialCmp(other: Strength): Int =
         cmp(other)
 
+    /** Compare two strengths by their underlying value. */
     override fun compareTo(other: Strength): Int =
         cmp(other)
 }

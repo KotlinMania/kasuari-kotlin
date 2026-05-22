@@ -4,14 +4,14 @@ Based on AST analysis, here are the concrete next steps.
 
 ## Summary
 
-- **Files Present:** 9/10 (90.0%)
+- **Files Present:** 10/10 (100.0%)
 - **Function parity:** 86/139 matched (target 212) — 61.9%
-- **Class/type parity:** 21/27 matched (target 35) — 77.8%
-- **Combined symbol parity:** 107/166 matched (target 247) — 64.5%
+- **Class/type parity:** 21/27 matched (target 36) — 77.8%
+- **Combined symbol parity:** 107/166 matched (target 248) — 64.5%
 - **Average inline-code cosine:** 0.56 (function body across 9 matched files)
-- **Average documentation cosine:** 0.77 (doc text across 9 matched files)
+- **Average documentation cosine:** 0.71 (doc text across 9 matched files)
 - **Cheat-zeroed Files:** 0
-- **Critical Issues:** 5 files with <0.60 function similarity
+- **Critical Issues:** 6 files with <0.60 function similarity
 
 ## Priority 1: Fix Incomplete High-Dependency Files
 
@@ -128,6 +128,17 @@ Every matched file is listed below with function and type symbol parity.
 - **Types:** 5/5 matched (target 12)
 - **Missing types:** _none_
 
+### 10. lib
+
+- **Target:** `Lib [STUB]`
+- **Similarity:** 1.00
+- **Dependents:** 0
+- **Priority Score:** 0.0
+- **Functions:** 0/0 matched
+- **Missing functions:** _none_
+- **Types:** 0/0 matched (target 1)
+- **Missing types:** _none_
+
 ## Success Criteria
 
 For each file to be considered "complete":
@@ -136,17 +147,4 @@ For each file to be considered "complete":
 - All tests ported
 - Documentation ported
 - port-lint header present
-
-## Reexport / Wiring Modules
-
-These files match `reexport_modules` patterns in `.ast_distance_config.json`. They are filtered out of
-normal priority and missing-file ladders because they are wiring
-modules, not direct logic ports. Consult them for call-site routing;
-do not treat them as the next implementation target by default.
-
-### Missing
-
-| Source | Expected target | Deps | Source path | Expected path |
-|--------|-----------------|------|-------------|---------------|
-| `lib` | `Lib` | 0 | `lib.rs` | `Lib.kt` |
 

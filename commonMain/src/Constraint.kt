@@ -65,7 +65,10 @@ class Constraint private constructor(
     }
 }
 
-/** This is an intermediate type used in the syntactic sugar for specifying constraints. You should not use it directly. */
+/**
+ * This is an intermediate type used in the syntactic sugar for specifying constraints. You
+ * should not use it directly.
+ */
 class PartialConstraint(
     val expression: Expression,
     val relation: WeightedRelation,
@@ -76,24 +79,49 @@ class PartialConstraint(
             PartialConstraint(expression = expression, relation = relation)
     }
 
+    /**
+     * Complete the partial constraint by subtracting the given constant from the left-hand
+     * side expression and constructing a [Constraint] with the operator and strength carried
+     * by this partial constraint.
+     */
     infix fun to(rhs: Double): Constraint {
         val (operator, strength) = relation.toOperatorAndStrength()
         return Constraint.new(expression - rhs, operator, strength)
     }
 
+    /**
+     * Complete the partial constraint by subtracting the given constant from the left-hand
+     * side expression and constructing a [Constraint] with the operator and strength carried
+     * by this partial constraint.
+     */
     infix fun to(rhs: Float): Constraint =
         to(rhs.toDouble())
 
+    /**
+     * Complete the partial constraint by subtracting the given variable from the left-hand
+     * side expression and constructing a [Constraint] with the operator and strength carried
+     * by this partial constraint.
+     */
     infix fun to(rhs: Variable): Constraint {
         val (operator, strength) = relation.toOperatorAndStrength()
         return Constraint.new(expression - rhs, operator, strength)
     }
 
+    /**
+     * Complete the partial constraint by subtracting the given term from the left-hand side
+     * expression and constructing a [Constraint] with the operator and strength carried by
+     * this partial constraint.
+     */
     infix fun to(rhs: Term): Constraint {
         val (operator, strength) = relation.toOperatorAndStrength()
         return Constraint.new(expression - rhs, operator, strength)
     }
 
+    /**
+     * Complete the partial constraint by subtracting the given expression from the left-hand
+     * side expression and constructing a [Constraint] with the operator and strength carried
+     * by this partial constraint.
+     */
     infix fun to(rhs: Expression): Constraint {
         val (operator, strength) = relation.toOperatorAndStrength()
         return Constraint.new(expression - rhs, operator, strength)
