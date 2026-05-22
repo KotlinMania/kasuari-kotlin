@@ -1,3 +1,4 @@
+// port-lint: tests variable.rs
 package kasuari
 
 import kotlin.test.Test
