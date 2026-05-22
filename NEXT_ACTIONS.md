@@ -5,11 +5,11 @@ Based on AST analysis, here are the concrete next steps.
 ## Summary
 
 - **Files Present:** 9/10 (90.0%)
-- **Function parity:** 80/139 matched (target 204) — 57.6%
+- **Function parity:** 86/139 matched (target 212) — 61.9%
 - **Class/type parity:** 21/27 matched (target 35) — 77.8%
-- **Combined symbol parity:** 101/166 matched (target 239) — 60.8%
-- **Average inline-code cosine:** 0.54 (function body across 9 matched files)
-- **Average documentation cosine:** 0.72 (doc text across 9 matched files)
+- **Combined symbol parity:** 107/166 matched (target 247) — 64.5%
+- **Average inline-code cosine:** 0.56 (function body across 9 matched files)
+- **Average documentation cosine:** 0.73 (doc text across 9 matched files)
 - **Cheat-zeroed Files:** 0
 - **Critical Issues:** 5 files with <0.60 function similarity
 
@@ -30,11 +30,11 @@ Every matched file is listed below with function and type symbol parity.
 ### 1. strength
 
 - **Target:** `Strength`
-- **Similarity:** 0.25
+- **Similarity:** 0.49
 - **Dependents:** 2
-- **Priority Score:** 2071707.5
-- **Functions:** 9/15 matched (target 18)
-- **Missing functions:** `add_assign`, `sub_assign`, `mul`, `mul_assign`, `cmp`, `partial_cmp`
+- **Priority Score:** 2011705.1
+- **Functions:** 15/15 matched (target 26)
+- **Missing functions:** _none_
 - **Types:** 1/2 matched (target 1)
 - **Missing types:** `Output`
 
@@ -137,16 +137,6 @@ For each file to be considered "complete":
 - Documentation ported
 - port-lint header present
 
-## Next Commands
-
-```bash
-# Initialize task queue for systematic porting
-cd tools/ast_distance
-./ast_distance --init-tasks ../../src rust ../../commonMain/src kotlin tasks.json ../../AGENTS.md
-
-# Get next high-priority task
-./ast_distance --assign tasks.json <agent-id>
-```
 ## Reexport / Wiring Modules
 
 These files match `reexport_modules` patterns in `.ast_distance_config.json`. They are filtered out of
