@@ -17,8 +17,9 @@ name: "CodeQL Advanced"
 # for that language:
 #
 #   1. JDK + Gradle setup (the other two languages need no toolchain).
-#   2. A `./gradlew compileAndroidMain compileKotlinJs compileKotlinWasmJs`
-#      invocation under the CodeQL build tracer.
+#   2. A narrow traced `./gradlew setupAndroidSdk compileAndroidMain
+#      compileKotlinJs compileKotlinWasmJs` invocation under the CodeQL build
+#      tracer.
 #
 # This is a strict-KMP project with no JVM target, so the autobuild
 # default for java-kotlin (`./gradlew testClasses`) has no task to run
@@ -27,8 +28,9 @@ name: "CodeQL Advanced"
 # JVM `kotlinc` for the android target and emits real `.class` files
 # under `build/classes/kotlin/android/main` -- exactly what the
 # extractor's LD_PRELOAD tracer (installed by `Initialize CodeQL`)
-# hooks. `compileAndroidMain` therefore carries the java-kotlin
-# analysis; `compileKotlinJs`/`compileKotlinWasmJs` are added on the
+# hooks. `setupAndroidSdk` makes the project-local Android SDK available
+# before `compileAndroidMain`, which carries the java-kotlin analysis;
+# `compileKotlinJs`/`compileKotlinWasmJs` are added on the
 # chance the tracer also matches the JS/WASM `kotlinc` execs.
 # `--rerun-tasks --no-build-cache` defeat Gradle's up-to-date check so
 # kotlinc actually runs; `-Pkotlin.compiler.execution.strategy=out-of-process`
@@ -107,6 +109,7 @@ jobs:
         if: matrix.build-mode == 'manual'
         run: |
           ./gradlew \
+            setupAndroidSdk \
             compileAndroidMain \
             compileKotlinJs \
             compileKotlinWasmJs \

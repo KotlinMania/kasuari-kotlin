@@ -96,6 +96,22 @@ data class Strength(private val value: Double) : Comparable<Strength> {
     operator fun minus(rhs: Strength): Strength =
         sub(rhs)
 
+    /** Perform an in-place-style addition of two strengths, clipping the result to the legal range */
+    fun addAssign(rhs: Strength): Strength =
+        this + rhs
+
+    /** Perform an in-place-style subtraction of two strengths, clipping the result to the legal range */
+    fun subAssign(rhs: Strength): Strength =
+        this - rhs
+
+    /** Multiply a strength by a scalar, clipping the result to the legal range */
+    fun mul(rhs: Double): Strength =
+        mulF64(rhs)
+
+    /** Multiply a strength by a scalar, clipping the result to the legal range */
+    fun mul(rhs: Float): Strength =
+        mulF32(rhs)
+
     /** Multiply a strength by a scalar, clipping the result to the legal range */
     operator fun times(rhs: Double): Strength =
         mulF64(rhs)
@@ -103,6 +119,14 @@ data class Strength(private val value: Double) : Comparable<Strength> {
     /** Multiply a strength by a scalar, clipping the result to the legal range */
     operator fun times(rhs: Float): Strength =
         mulF32(rhs)
+
+    /** Perform an in-place-style multiplication of a strength by a scalar, clipping the result to the legal range */
+    fun mulAssign(rhs: Double): Strength =
+        this * rhs
+
+    /** Perform an in-place-style multiplication of a strength by a scalar, clipping the result to the legal range */
+    fun mulAssign(rhs: Float): Strength =
+        this * rhs
 
     /** Divide a strength by a scalar, clipping the result to the legal range */
     operator fun div(rhs: Double): Strength =
@@ -112,8 +136,14 @@ data class Strength(private val value: Double) : Comparable<Strength> {
     operator fun div(rhs: Float): Strength =
         divF32(rhs)
 
+    fun cmp(other: Strength): Int =
+        value.compareTo(other.value)
+
+    fun partialCmp(other: Strength): Int =
+        cmp(other)
+
     override fun compareTo(other: Strength): Int =
-        this.value.compareTo(other.value)
+        cmp(other)
 }
 
 /** Multiply a scalar by a strength, clipping the result to the legal range */
