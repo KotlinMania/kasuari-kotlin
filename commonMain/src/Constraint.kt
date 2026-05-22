@@ -55,13 +55,25 @@ class Constraint private constructor(
     fun strength(): Strength =
         inner.strength
 
-    override fun hashCode(): Int =
+    /**
+     * Compute a hash for this constraint based on its identity, matching the upstream identity-based hash that hashes the inner pointer.
+     */
+    fun hash(): Int =
         id.hashCode()
+
+    /**
+     * Test whether two constraints share the same underlying identity, matching the upstream identity-based equality that compares the inner pointers.
+     */
+    fun eq(other: Constraint): Boolean =
+        id == other.id
+
+    override fun hashCode(): Int =
+        hash()
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is Constraint) return false
-        return id == other.id
+        return eq(other)
     }
 }
 
@@ -126,4 +138,36 @@ class PartialConstraint(
         val (operator, strength) = relation.toOperatorAndStrength()
         return Constraint.new(expression - rhs, operator, strength)
     }
+
+    /**
+     * Complete the partial constraint with a constant on the right-hand side, mirroring the upstream BitOr operator that takes a `Double` on `PartialConstraint`. Equivalent to [to].
+     */
+    infix fun bitor(rhs: Double): Constraint =
+        this to rhs
+
+    /**
+     * Complete the partial constraint with a constant on the right-hand side, mirroring the upstream BitOr operator that takes a `Float` on `PartialConstraint`. Equivalent to [to].
+     */
+    infix fun bitor(rhs: Float): Constraint =
+        this to rhs
+
+    /**
+     * Complete the partial constraint with a variable on the right-hand side, mirroring the upstream BitOr operator that takes a `Variable` on `PartialConstraint`. Equivalent to [to].
+     */
+    infix fun bitor(rhs: Variable): Constraint =
+        this to rhs
+
+    /**
+     * Complete the partial constraint with a term on the right-hand side, mirroring the upstream BitOr operator that takes a `Term` on `PartialConstraint`. Equivalent to [to].
+     */
+    infix fun bitor(rhs: Term): Constraint =
+        this to rhs
+
+    /**
+     * Complete the partial constraint with an expression on the right-hand side, mirroring
+     * the upstream BitOr operator that takes an `Expression` on `PartialConstraint`.
+     * Equivalent to [to].
+     */
+    infix fun bitor(rhs: Expression): Constraint =
+        this to rhs
 }

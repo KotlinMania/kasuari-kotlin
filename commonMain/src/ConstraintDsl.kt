@@ -4,7 +4,7 @@ package kasuari
 /**
  * Kotlin-friendly constraint DSL helpers.
  *
- * Rust uses `BitOr<WeightedRelation>` (`|`) for this sugar, but Kotlin cannot overload `|` for
+ * The upstream uses bitwise-or (`|`) for this sugar, but Kotlin cannot overload `|` for
  * arbitrary types. These `with` infix functions provide equivalent ergonomics:
  *
  * `expr with WeightedRelation.EQ(strength) to rhs`

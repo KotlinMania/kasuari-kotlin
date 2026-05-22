@@ -12,11 +12,17 @@ enum class RelationalOperator {
     /** `>=` */
     GreaterOrEqual;
 
-    override fun toString(): String = when (this) {
+    /**
+     * Format this operator as its relational symbol — `"<="`, `"=="`, or `">="` — for use
+     * when printing or logging a constraint.
+     */
+    fun fmt(): String = when (this) {
         LessOrEqual -> "<="
         Equal -> "=="
         GreaterOrEqual -> ">="
     }
+
+    override fun toString(): String = fmt()
 }
 
 /**
