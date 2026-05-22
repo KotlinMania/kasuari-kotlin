@@ -22,48 +22,40 @@ These abstractions belong in a higher-level library.
 
 ## Supported Platforms
 
-- macOS (arm64, x64)
-- Linux (x64)
-- Windows (x64 via MinGW)
+- Apple: `macosArm64`, `iosArm64`, `iosSimulatorArm64`, `iosX64`,
+  `tvosArm64`, `tvosSimulatorArm64`, `watchosArm32`, `watchosArm64`,
+  `watchosDeviceArm64`, `watchosSimulatorArm64`
+- Linux: `linuxX64`, `linuxArm64`
+- Windows: `mingwX64`
+- Android: Android KMP library (`compileSdk 34`, `minSdk 24`) plus
+  `androidNativeArm32`, `androidNativeArm64`, `androidNativeX86`,
+  `androidNativeX64`
+- JVM (`jvmToolchain(21)`)
+- Web: `js` (browser + Node.js), `wasmJs` (browser + Node.js), `wasmWasi`
+  (Node.js)
 
 ## Installation
 
-### As a Git Submodule (Recommended)
-
-This library is not yet published to Maven Central. The recommended approach is to include it as a
-git submodule or vendored dependency:
-
-```bash
-git submodule add https://github.com/KotlinMania/kasuari-kotlin.git
-```
-
-Then in your `settings.gradle.kts`:
+Kasuari-Kotlin is published to Maven Central as
+`io.github.kotlinmania:kasuari-kotlin`.
 
 ```kotlin
-include(":kasuari-kotlin")
+dependencies {
+    implementation("io.github.kotlinmania:kasuari-kotlin:0.1.2")
+}
 ```
 
-And in your module's `build.gradle.kts`:
+For a Kotlin Multiplatform consumer, add it to the relevant source set:
 
 ```kotlin
 kotlin {
     sourceSets {
         val commonMain by getting {
             dependencies {
-                implementation(project(":kasuari-kotlin"))
+                implementation("io.github.kotlinmania:kasuari-kotlin:0.1.2")
             }
         }
     }
-}
-```
-
-### Future Maven Central Publication
-
-Once published to Maven Central, you'll be able to add it directly:
-
-```kotlin
-dependencies {
-    implementation("io.github.kotlinmania:kasuari-kotlin:1.0.0")
 }
 ```
 
