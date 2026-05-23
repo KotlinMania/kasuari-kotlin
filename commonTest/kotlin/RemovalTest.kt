@@ -1,3 +1,4 @@
+// port-lint: source tests/removal.rs
 package kasuari
 
 import kotlin.test.Test

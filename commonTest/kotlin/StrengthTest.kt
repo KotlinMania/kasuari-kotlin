@@ -253,7 +253,7 @@ class StrengthTest {
     }
 
     // ============================================================================
-    // add_assign tests
+    // addAssign tests
     // ============================================================================
 
     @Test
@@ -306,7 +306,7 @@ class StrengthTest {
     }
 
     // ============================================================================
-    // sub_assign tests
+    // subAssign tests
     // ============================================================================
 
     @Test
@@ -366,7 +366,7 @@ class StrengthTest {
     }
 
     // ============================================================================
-    // mul_assign tests
+    // mulAssign tests
     // ============================================================================
 
     @Test
@@ -434,9 +434,8 @@ class StrengthTest {
 
     @Test
     fun compareStrengths() {
-        assertTrue(Strength.ZERO.cmp(Strength.WEAK) < 0)
-        assertEquals(0, Strength.MEDIUM.cmp(Strength.MEDIUM))
-        assertTrue(Strength.REQUIRED.cmp(Strength.STRONG) > 0)
-        assertTrue(Strength.ZERO.partialCmp(Strength.WEAK) < 0)
+        assertTrue(Strength.ZERO < Strength.WEAK)
+        assertEquals(0, Strength.MEDIUM.compareTo(Strength.MEDIUM))
+        assertTrue(Strength.REQUIRED > Strength.STRONG)
     }
 }
