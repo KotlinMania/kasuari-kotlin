@@ -44,36 +44,29 @@ class Constraint private constructor(
     }
 
     /** The expression of the left hand side of the constraint equation. */
-    fun expr(): Expression =
-        inner.expression
+    fun expr(): Expression = inner.expression
 
     /** The relational operator governing the constraint. */
-    fun op(): RelationalOperator =
-        inner.operator
+    fun op(): RelationalOperator = inner.operator
 
     /** The strength of the constraint that the solver will use. */
-    fun strength(): Strength =
-        inner.strength
+    fun strength(): Strength = inner.strength
 
     /**
-     * Compute a hash for this constraint based on its identity, matching the upstream identity-based hash that hashes the inner pointer.
+     * Identity-based hash: every constraint instance has its own unique id, so two distinct
+     * constraints with equal expressions / operators / strengths still hash to different
+     * values. Matches the upstream identity-based hash.
      */
-    fun hash(): Int =
-        id.hashCode()
+    override fun hashCode(): Int = id.hashCode()
 
     /**
-     * Test whether two constraints share the same underlying identity, matching the upstream identity-based equality that compares the inner pointers.
+     * Identity-based equality: two [Constraint] instances are equal only when they share the
+     * same underlying id. Matches the upstream identity-based equality.
      */
-    fun eq(other: Constraint): Boolean =
-        id == other.id
-
-    override fun hashCode(): Int =
-        hash()
-
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is Constraint) return false
-        return eq(other)
+        return id == other.id
     }
 }
 
@@ -101,18 +94,12 @@ class PartialConstraint(
         return Constraint.new(expression - rhs, operator, strength)
     }
 
-    /**
-     * Complete the partial constraint by subtracting the given constant from the left-hand
-     * side expression and constructing a [Constraint] with the operator and strength carried
-     * by this partial constraint.
-     */
-    infix fun to(rhs: Float): Constraint =
-        to(rhs.toDouble())
+    /** Float overload of [to]; widens to [Double] internally. */
+    infix fun to(rhs: Float): Constraint = to(rhs.toDouble())
 
     /**
      * Complete the partial constraint by subtracting the given variable from the left-hand
-     * side expression and constructing a [Constraint] with the operator and strength carried
-     * by this partial constraint.
+     * side expression.
      */
     infix fun to(rhs: Variable): Constraint {
         val (operator, strength) = relation.toOperatorAndStrength()
@@ -121,8 +108,7 @@ class PartialConstraint(
 
     /**
      * Complete the partial constraint by subtracting the given term from the left-hand side
-     * expression and constructing a [Constraint] with the operator and strength carried by
-     * this partial constraint.
+     * expression.
      */
     infix fun to(rhs: Term): Constraint {
         val (operator, strength) = relation.toOperatorAndStrength()
@@ -131,43 +117,10 @@ class PartialConstraint(
 
     /**
      * Complete the partial constraint by subtracting the given expression from the left-hand
-     * side expression and constructing a [Constraint] with the operator and strength carried
-     * by this partial constraint.
+     * side expression.
      */
     infix fun to(rhs: Expression): Constraint {
         val (operator, strength) = relation.toOperatorAndStrength()
         return Constraint.new(expression - rhs, operator, strength)
     }
-
-    /**
-     * Complete the partial constraint with a constant on the right-hand side, mirroring the upstream BitOr operator that takes a `Double` on `PartialConstraint`. Equivalent to [to].
-     */
-    infix fun bitor(rhs: Double): Constraint =
-        this to rhs
-
-    /**
-     * Complete the partial constraint with a constant on the right-hand side, mirroring the upstream BitOr operator that takes a `Float` on `PartialConstraint`. Equivalent to [to].
-     */
-    infix fun bitor(rhs: Float): Constraint =
-        this to rhs
-
-    /**
-     * Complete the partial constraint with a variable on the right-hand side, mirroring the upstream BitOr operator that takes a `Variable` on `PartialConstraint`. Equivalent to [to].
-     */
-    infix fun bitor(rhs: Variable): Constraint =
-        this to rhs
-
-    /**
-     * Complete the partial constraint with a term on the right-hand side, mirroring the upstream BitOr operator that takes a `Term` on `PartialConstraint`. Equivalent to [to].
-     */
-    infix fun bitor(rhs: Term): Constraint =
-        this to rhs
-
-    /**
-     * Complete the partial constraint with an expression on the right-hand side, mirroring
-     * the upstream BitOr operator that takes an `Expression` on `PartialConstraint`.
-     * Equivalent to [to].
-     */
-    infix fun bitor(rhs: Expression): Constraint =
-        this to rhs
 }

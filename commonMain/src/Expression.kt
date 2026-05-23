@@ -56,180 +56,14 @@ data class Expression(
     /** The terms in the expression. */
     val terms: MutableList<Term>,
     /** The constant in the expression. */
-    var constant: Double
+    var constant: Double,
 ) {
-    /** Negate this expression, mirroring the upstream unary minus operator on `Expression`. */
-    fun neg(): Expression =
-        Expression(
-            terms.map { it.neg() }.toMutableList(),
-            if (constant == 0.0) 0.0 else -constant
-        )
-
     /**
      * Creates a copy of this expression with an independent mutable terms list.
      *
      * Changes to the copy will not affect the original expression.
-     *
-     * @return A new [Expression] with the same terms and constant.
      */
     fun copy(): Expression = Expression(terms.toMutableList(), constant)
-
-    /**
-     * Multiply this expression by a scalar, mirroring the upstream multiplication operator that takes a `Double` on `Expression`.
-     */
-    fun mul(rhs: Double): Expression {
-        val result = copy()
-        result.mulAssign(rhs)
-        return result
-    }
-
-    /**
-     * Multiply this expression by a scalar, mirroring the upstream multiplication operator that takes a `Float` on `Expression`.
-     */
-    fun mul(rhs: Float): Expression =
-        mul(rhs.toDouble())
-
-    /**
-     * Multiply this expression by a scalar in place, mirroring the upstream in-place multiplication operator that takes a `Double` on `Expression`.
-     */
-    fun mulAssign(rhs: Double) {
-        constant *= rhs
-        for (i in terms.indices) {
-            terms[i] = terms[i] * rhs
-        }
-    }
-
-    /**
-     * Multiply this expression by a scalar in place, mirroring the upstream in-place multiplication operator that takes a `Float` on `Expression`.
-     */
-    fun mulAssign(rhs: Float) {
-        mulAssign(rhs.toDouble())
-    }
-
-    /**
-     * Divide this expression by a scalar, mirroring the upstream division operator that takes a `Double` on `Expression`.
-     */
-    fun div(rhs: Double): Expression {
-        val result = copy()
-        result.divAssign(rhs)
-        return result
-    }
-
-    /**
-     * Divide this expression by a scalar, mirroring the upstream division operator that takes a `Float` on `Expression`.
-     */
-    fun div(rhs: Float): Expression =
-        div(rhs.toDouble())
-
-    /**
-     * Divide this expression by a scalar in place, mirroring the upstream in-place division operator that takes a `Double` on `Expression`.
-     */
-    fun divAssign(rhs: Double) {
-        constant /= rhs
-        for (i in terms.indices) {
-            terms[i] = terms[i] / rhs
-        }
-    }
-
-    /**
-     * Divide this expression by a scalar in place, mirroring the upstream in-place division operator that takes a `Float` on `Expression`.
-     */
-    fun divAssign(rhs: Float) {
-        divAssign(rhs.toDouble())
-    }
-
-    /**
-     * Add a constant to this expression, mirroring the upstream addition operator that takes a `Double` on `Expression`.
-     */
-    fun add(rhs: Double): Expression {
-        val result = copy()
-        result.addAssign(rhs)
-        return result
-    }
-
-    /**
-     * Add a constant to this expression, mirroring the upstream addition operator that takes a `Float` on `Expression`.
-     */
-    fun add(rhs: Float): Expression =
-        add(rhs.toDouble())
-
-    /**
-     * Add another expression to this expression, mirroring the upstream addition operator that takes a `Expression` on `Expression`.
-     */
-    fun add(rhs: Expression): Expression {
-        val result = copy()
-        result.addAssign(rhs)
-        return result
-    }
-
-    /**
-     * Add a constant to this expression in place, mirroring the upstream in-place addition operator that takes a `Double` on `Expression`.
-     */
-    fun addAssign(rhs: Double) {
-        constant += rhs
-    }
-
-    /**
-     * Add a constant to this expression in place, mirroring the upstream in-place addition operator that takes a `Float` on `Expression`.
-     */
-    fun addAssign(rhs: Float) {
-        addAssign(rhs.toDouble())
-    }
-
-    /**
-     * Add another expression to this expression in place, mirroring the upstream in-place addition operator that takes a `Expression` on `Expression`.
-     */
-    fun addAssign(rhs: Expression) {
-        terms.addAll(rhs.terms)
-        constant += rhs.constant
-    }
-
-    /**
-     * Subtract a constant from this expression, mirroring the upstream subtraction operator that takes a `Double` on `Expression`.
-     */
-    fun sub(rhs: Double): Expression {
-        val result = copy()
-        result.subAssign(rhs)
-        return result
-    }
-
-    /**
-     * Subtract a constant from this expression, mirroring the upstream subtraction operator that takes a `Float` on `Expression`.
-     */
-    fun sub(rhs: Float): Expression =
-        sub(rhs.toDouble())
-
-    /**
-     * Subtract another expression from this expression, mirroring the upstream subtraction operator that takes a `Expression` on `Expression`.
-     */
-    fun sub(rhs: Expression): Expression {
-        val result = copy()
-        result.subAssign(rhs)
-        return result
-    }
-
-    /**
-     * Subtract a constant from this expression in place, mirroring the upstream in-place subtraction operator that takes a `Double` on `Expression`.
-     */
-    fun subAssign(rhs: Double) {
-        constant -= rhs
-    }
-
-    /**
-     * Subtract a constant from this expression in place, mirroring the upstream in-place subtraction operator that takes a `Float` on `Expression`.
-     */
-    fun subAssign(rhs: Float) {
-        subAssign(rhs.toDouble())
-    }
-
-    /**
-     * Subtract another expression from this expression in place, mirroring the upstream in-place subtraction operator that takes a `Expression` on `Expression`.
-     */
-    fun subAssign(rhs: Expression) {
-        val negated = -rhs
-        terms.addAll(negated.terms)
-        constant += negated.constant
-    }
 
     companion object {
         /**
@@ -238,10 +72,6 @@ data class Expression(
          * ```
          * expression = term₁ + term₂ + ... + termₙ + constant
          * ```
-         *
-         * @param terms The terms in the expression.
-         * @param constant The constant value.
-         * @return A new [Expression].
          */
         fun new(terms: List<Term>, constant: Double): Expression =
             Expression(terms.toMutableList(), constant)
@@ -252,15 +82,12 @@ data class Expression(
          * ```
          * expression = constant
          * ```
-         *
-         * @param constant The constant value.
-         * @return A new [Expression] with no terms.
          */
         fun fromConstant(constant: Double): Expression =
             Expression(mutableListOf(), constant)
 
-        fun from(constant: Double): Expression =
-            fromConstant(constant)
+        /** Constructs an expression from a single constant — convenience alias for [fromConstant]. */
+        fun from(constant: Double): Expression = fromConstant(constant)
 
         /**
          * Constructs an expression from a single term.
@@ -268,15 +95,12 @@ data class Expression(
          * ```
          * expression = term
          * ```
-         *
-         * @param term The term to convert to an expression.
-         * @return A new [Expression] containing the term.
          */
         fun fromTerm(term: Term): Expression =
             Expression(mutableListOf(term), 0.0)
 
-        fun from(term: Term): Expression =
-            fromTerm(term)
+        /** Constructs an expression from a single term — convenience alias for [fromTerm]. */
+        fun from(term: Term): Expression = fromTerm(term)
 
         /**
          * Constructs an expression from a list of terms.
@@ -284,33 +108,18 @@ data class Expression(
          * ```
          * expression = term₁ + term₂ + ... + termₙ
          * ```
-         *
-         * @param terms The list of terms.
-         * @return A new [Expression] with constant 0.0.
          */
         fun fromTerms(terms: List<Term>): Expression =
             Expression(terms.toMutableList(), 0.0)
 
         /**
          * Constructs an expression from an iterable of terms.
-         *
-         * ```kotlin
-         * val expr = Expression.fromTerms(terms.filter { it.coefficient != 0.0 })
-         * ```
-         *
-         * @param terms An iterable of terms.
-         * @return A new [Expression] with constant 0.0.
          */
         fun fromTerms(terms: Iterable<Term>): Expression =
             Expression(terms.toMutableList(), 0.0)
 
         /**
-         * Constructs an expression from a sequence of terms.
-         *
-         * Useful for lazy evaluation of term collections.
-         *
-         * @param terms A sequence of terms.
-         * @return A new [Expression] with constant 0.0.
+         * Constructs an expression from a sequence of terms (useful for lazy evaluation).
          */
         fun fromTerms(terms: Sequence<Term>): Expression =
             Expression(terms.toMutableList(), 0.0)
@@ -321,18 +130,12 @@ data class Expression(
          * ```
          * expression = variable  (with coefficient 1.0)
          * ```
-         *
-         * @param variable The variable to convert to an expression.
-         * @return A new [Expression] containing the variable.
          */
         fun fromVariable(variable: Variable): Expression =
             Expression(mutableListOf(Term.fromVariable(variable)), 0.0)
 
-        fun from(variable: Variable): Expression =
-            fromVariable(variable)
-
-        fun fromIter(terms: Iterable<Term>): Expression =
-            fromTerms(terms)
+        /** Constructs an expression from a single variable — convenience alias for [fromVariable]. */
+        fun from(variable: Variable): Expression = fromVariable(variable)
     }
 }
 
@@ -342,7 +145,10 @@ data class Expression(
 
 /** Negates this expression, producing a new [Expression] with all terms and constant negated. */
 operator fun Expression.unaryMinus(): Expression =
-    this.neg()
+    Expression(
+        terms.map { -it }.toMutableList(),
+        if (constant == 0.0) 0.0 else -constant,
+    )
 
 /** Multiplies this expression by a scalar, producing a new [Expression]. */
 operator fun Expression.times(rhs: Double): Expression {
@@ -500,16 +306,8 @@ operator fun Expression.minusAssign(rhs: Expression) {
 // Conversion extensions
 // ============================================================================
 
-/**
- * Converts this [Double] to an [Expression] (constant-only expression).
- *
- * @return An [Expression] with no terms and this value as the constant.
- */
+/** Converts this [Double] to an [Expression] (constant-only expression). */
 fun Double.toExpression(): Expression = Expression.fromConstant(this)
 
-/**
- * Converts this [Float] to an [Expression] (constant-only expression).
- *
- * @return An [Expression] with no terms and this value as the constant.
- */
+/** Converts this [Float] to an [Expression] (constant-only expression). */
 fun Float.toExpression(): Expression = Expression.fromConstant(this.toDouble())

@@ -86,146 +86,56 @@ data class Strength(private val value: Double) : Comparable<Strength> {
     /**
      * The value of the strength.
      */
-    fun value(): Double =
-        value
+    fun value(): Double = value
 
     /**
      * Add two strengths together, clamping the result to the legal range.
      */
-    fun add(rhs: Strength): Strength =
+    operator fun plus(rhs: Strength): Strength =
         new(this.value + rhs.value)
 
     /**
-     * Subtract one strength from another, clipping the result to the legal range.
+     * Subtract one strength from another, clamping the result to the legal range.
      */
-    fun sub(rhs: Strength): Strength =
+    operator fun minus(rhs: Strength): Strength =
         new(this.value - rhs.value)
 
     /**
-     * Multiply a strength by a scalar, clipping the result to the legal range.
+     * Multiply this strength by a scalar, clamping the result to the legal range.
      */
-    fun mulF64(rhs: Double): Strength =
+    operator fun times(rhs: Double): Strength =
         new(this.value * rhs)
 
     /**
-     * Multiply a strength by a scalar, clipping the result to the legal range.
+     * Multiply this strength by a scalar, clamping the result to the legal range.
      */
-    fun mulF32(rhs: Float): Strength =
+    operator fun times(rhs: Float): Strength =
         new(this.value * rhs.toDouble())
 
     /**
-     * Divide a strength by a scalar, clipping the result to the legal range.
+     * Divide this strength by a scalar, clamping the result to the legal range.
      */
-    fun divF64(rhs: Double): Strength =
+    operator fun div(rhs: Double): Strength =
         new(this.value / rhs)
 
     /**
-     * Divide a strength by a scalar, clipping the result to the legal range.
-     */
-    fun divF32(rhs: Float): Strength =
-        new(this.value / rhs.toDouble())
-
-    /**
-     * Add two strengths together, clipping the result to the legal range.
-     */
-    operator fun plus(rhs: Strength): Strength =
-        add(rhs)
-
-    /**
-     * Subtract one strength from another, clipping the result to the legal range.
-     */
-    operator fun minus(rhs: Strength): Strength =
-        sub(rhs)
-
-    /**
-     * Perform an in-place-style addition of two strengths, clipping the result to the legal
-     * range.
-     */
-    fun addAssign(rhs: Strength): Strength =
-        this + rhs
-
-    /**
-     * Perform an in-place-style subtraction of two strengths, clipping the result to the legal
-     * range.
-     */
-    fun subAssign(rhs: Strength): Strength =
-        this - rhs
-
-    /**
-     * Multiply a strength by a scalar, clipping the result to the legal range.
-     */
-    fun mul(rhs: Double): Strength =
-        mulF64(rhs)
-
-    /**
-     * Multiply a strength by a scalar, clipping the result to the legal range.
-     */
-    fun mul(rhs: Float): Strength =
-        mulF32(rhs)
-
-    /**
-     * Multiply a strength by a scalar, clipping the result to the legal range.
-     */
-    operator fun times(rhs: Double): Strength =
-        mulF64(rhs)
-
-    /**
-     * Multiply a strength by a scalar, clipping the result to the legal range.
-     */
-    operator fun times(rhs: Float): Strength =
-        mulF32(rhs)
-
-    /**
-     * Perform an in-place-style multiplication of a strength by a scalar, clipping the result to
-     * the legal range.
-     */
-    fun mulAssign(rhs: Double): Strength =
-        this * rhs
-
-    /**
-     * Perform an in-place-style multiplication of a strength by a scalar, clipping the result to
-     * the legal range.
-     */
-    fun mulAssign(rhs: Float): Strength =
-        this * rhs
-
-    /**
-     * Divide a strength by a scalar, clipping the result to the legal range.
-     */
-    operator fun div(rhs: Double): Strength =
-        divF64(rhs)
-
-    /**
-     * Divide a strength by a scalar, clipping the result to the legal range.
+     * Divide this strength by a scalar, clamping the result to the legal range.
      */
     operator fun div(rhs: Float): Strength =
-        divF32(rhs)
-
-    /**
-     * Compare two strengths by their underlying value.
-     */
-    fun cmp(other: Strength): Int =
-        value.compareTo(other.value)
-
-    /**
-     * Compare two strengths by their underlying value, returning a negative, zero, or positive
-     * integer.
-     */
-    fun partialCmp(other: Strength): Int =
-        cmp(other)
+        new(this.value / rhs.toDouble())
 
     /**
      * Compare two strengths by their underlying value.
      */
     override fun compareTo(other: Strength): Int =
-        cmp(other)
+        value.compareTo(other.value)
 }
 
 /**
- * Multiply a scalar by a strength, clipping the result to the legal range.
+ * Multiply a scalar by a strength, clamping the result to the legal range.
  */
 operator fun Double.times(rhs: Strength): Strength =
-    rhs.mulF64(this)
+    rhs * this
 
 private fun Double.clamp(min: Double, max: Double): Double =
     this.coerceIn(min, max)

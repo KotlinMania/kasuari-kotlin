@@ -5,13 +5,13 @@ Based on AST analysis, here are the concrete next steps.
 ## Summary
 
 - **Files Present:** 13/13 (100.0%)
-- **Function parity:** 144/145 matched (target 414) — 99.3%
+- **Function parity:** 107/145 matched (target 296) — 73.8%
 - **Class/type parity:** 23/29 matched (target 44) — 79.3%
-- **Combined symbol parity:** 167/174 matched (target 458) — 96.0%
-- **Average inline-code cosine:** 0.76 (function body across 11 matched files)
-- **Average documentation cosine:** 0.51 (doc text across 11 matched files)
+- **Combined symbol parity:** 130/174 matched (target 340) — 74.7%
+- **Average inline-code cosine:** 0.55 (function body across 11 matched files)
+- **Average documentation cosine:** 0.59 (doc text across 11 matched files)
 - **Cheat-zeroed Files:** 1
-- **Critical Issues:** 3 files with <0.60 function similarity
+- **Critical Issues:** 8 files with <0.60 function similarity
 
 ## Priority 1: Fix Incomplete High-Dependency Files
 
@@ -27,14 +27,30 @@ No missing high-value files detected.
 
 Every matched file is listed below with function and type symbol parity.
 
-### 1. kasuari-rs.variable
+### 1. kasuari-rs.strength
+
+- **Target:** `commonMain.Strength [PROVENANCE-FALLBACK]`
+- **Similarity:** 0.07
+- **Dependents:** 2
+- **Priority Score:** 2131709.2
+- **Functions:** 3/15 matched (target 80)
+- **Missing functions:** `add`, `sub`, `mul_f64`, `mul_f32`, `div_f64`, `div_f32`, `add_assign`, `sub_assign`, `mul`, `mul_assign`, `cmp`, `partial_cmp`
+- **Types:** 1/2 matched
+- **Missing types:** `Output`
+- **Provenance warning:** port-lint provenance header matched only after fallback normalization: `strength.rs` vs expected `strength.rs`
+- **Provenance warning:** port-lint provenance header matched only after fallback normalization: `tests:strength.rs` vs expected `strength.rs`
+- **Proposed provenance header:** `// port-lint: source strength.rs` (current: `// port-lint: source strength.rs`)
+- **Proposed provenance header:** `// port-lint: tests strength.rs` (current: `// port-lint: tests strength.rs`)
+- **Lint issues:** 2
+
+### 2. kasuari-rs.variable
 
 - **Target:** `commonMain.Variable [PROVENANCE-FALLBACK]`
-- **Similarity:** 0.66
+- **Similarity:** 0.38
 - **Dependents:** 2
-- **Priority Score:** 2023003.4
-- **Functions:** 27/28 matched (target 85)
-- **Missing functions:** `from_id`
+- **Priority Score:** 2083006.1
+- **Functions:** 21/28 matched (target 51)
+- **Missing functions:** `from_id`, `add`, `add_assign`, `neg`, `sub`, `sub_assign`, `mul`
 - **Types:** 1/2 matched
 - **Missing types:** `Output`
 - **Tests:** 18/19 matched
@@ -44,30 +60,28 @@ Every matched file is listed below with function and type symbol parity.
 - **Proposed provenance header:** `// port-lint: tests variable.rs` (current: `// port-lint: tests variable.rs`)
 - **Lint issues:** 2
 
-### 2. kasuari-rs.strength
+### 3. kasuari-rs.expression
 
-- **Target:** `commonMain.Strength [PROVENANCE-FALLBACK]`
-- **Similarity:** 0.49
-- **Dependents:** 2
-- **Priority Score:** 2011705.1
-- **Functions:** 15/15 matched (target 94)
-- **Missing functions:** _none_
-- **Types:** 1/2 matched
+- **Target:** `commonMain.Expression [PROVENANCE-FALLBACK]`
+- **Similarity:** 0.26
+- **Dependents:** 1
+- **Priority Score:** 1091807.4
+- **Functions:** 8/16 matched (target 40)
+- **Missing functions:** `from_iter`, `neg`, `mul`, `mul_assign`, `add`, `add_assign`, `sub`, `sub_assign`
+- **Types:** 1/2 matched (target 1)
 - **Missing types:** `Output`
-- **Provenance warning:** port-lint provenance header matched only after fallback normalization: `strength.rs` vs expected `strength.rs`
-- **Provenance warning:** port-lint provenance header matched only after fallback normalization: `tests:strength.rs` vs expected `strength.rs`
-- **Proposed provenance header:** `// port-lint: source strength.rs` (current: `// port-lint: source strength.rs`)
-- **Proposed provenance header:** `// port-lint: tests strength.rs` (current: `// port-lint: tests strength.rs`)
-- **Lint issues:** 2
+- **Provenance warning:** port-lint provenance header matched only after fallback normalization: `expression.rs` vs expected `expression.rs`
+- **Proposed provenance header:** `// port-lint: source expression.rs` (current: `// port-lint: source expression.rs`)
+- **Lint issues:** 1
 
-### 3. kasuari-rs.term
+### 4. kasuari-rs.term
 
 - **Target:** `commonMain.Term [PROVENANCE-FALLBACK]`
-- **Similarity:** 0.66
+- **Similarity:** 0.41
 - **Dependents:** 1
-- **Priority Score:** 1013003.4
-- **Functions:** 28/28 matched (target 85)
-- **Missing functions:** _none_
+- **Priority Score:** 1073005.9
+- **Functions:** 22/28 matched (target 50)
+- **Missing functions:** `mul`, `mul_assign`, `add`, `add_assign`, `sub`, `sub_assign`
 - **Types:** 1/2 matched
 - **Missing types:** `Output`
 - **Tests:** 16/16 matched
@@ -77,28 +91,14 @@ Every matched file is listed below with function and type symbol parity.
 - **Proposed provenance header:** `// port-lint: tests term.rs` (current: `// port-lint: tests term.rs`)
 - **Lint issues:** 2
 
-### 4. kasuari-rs.expression
-
-- **Target:** `commonMain.Expression [PROVENANCE-FALLBACK]`
-- **Similarity:** 0.66
-- **Dependents:** 1
-- **Priority Score:** 1011803.4
-- **Functions:** 16/16 matched (target 62)
-- **Missing functions:** _none_
-- **Types:** 1/2 matched (target 1)
-- **Missing types:** `Output`
-- **Provenance warning:** port-lint provenance header matched only after fallback normalization: `expression.rs` vs expected `expression.rs`
-- **Proposed provenance header:** `// port-lint: source expression.rs` (current: `// port-lint: source expression.rs`)
-- **Lint issues:** 1
-
 ### 5. kasuari-rs.constraint
 
 - **Target:** `commonMain.Constraint [PROVENANCE-FALLBACK]`
-- **Similarity:** 0.69
+- **Similarity:** 0.39
 - **Dependents:** 1
-- **Priority Score:** 1011103.1
-- **Functions:** 7/7 matched (target 28)
-- **Missing functions:** _none_
+- **Priority Score:** 1041106.1
+- **Functions:** 4/7 matched (target 21)
+- **Missing functions:** `hash`, `eq`, `bitor`
 - **Types:** 3/4 matched
 - **Missing types:** `Output`
 - **Provenance warning:** port-lint provenance header matched only after fallback normalization: `constraint.rs` vs expected `constraint.rs`
@@ -110,11 +110,11 @@ Every matched file is listed below with function and type symbol parity.
 ### 6. kasuari-rs.relations
 
 - **Target:** `commonMain.Relations [PROVENANCE-FALLBACK]`
-- **Similarity:** 0.81
+- **Similarity:** 0.09
 - **Dependents:** 0
-- **Priority Score:** 10601.9
-- **Functions:** 3/3 matched (target 9)
-- **Missing functions:** _none_
+- **Priority Score:** 30609.1
+- **Functions:** 1/3 matched
+- **Missing functions:** `fmt`, `bitor`
 - **Types:** 2/3 matched (target 5)
 - **Missing types:** `Output`
 - **Provenance warning:** port-lint provenance header matched only after fallback normalization: `relations.rs` vs expected `relations.rs`

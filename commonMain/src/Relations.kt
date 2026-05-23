@@ -13,16 +13,14 @@ enum class RelationalOperator {
     GreaterOrEqual;
 
     /**
-     * Format this operator as its relational symbol — `"<="`, `"=="`, or `">="` — for use
+     * Render this operator as its relational symbol — `"<="`, `"=="`, or `">="` — for use
      * when printing or logging a constraint.
      */
-    fun fmt(): String = when (this) {
+    override fun toString(): String = when (this) {
         LessOrEqual -> "<="
         Equal -> "=="
         GreaterOrEqual -> ">="
     }
-
-    override fun toString(): String = fmt()
 }
 
 /**
@@ -53,23 +51,3 @@ sealed class WeightedRelation(val strength: Strength) {
             relation.toOperatorAndStrength()
     }
 }
-
-/** Begin a partial constraint with this constant value as the left-hand side expression. */
-infix fun Double.bitor(rhs: WeightedRelation): PartialConstraint =
-    PartialConstraint.new(Expression.fromConstant(this), rhs)
-
-/** Begin a partial constraint with this constant value as the left-hand side expression. */
-infix fun Float.bitor(rhs: WeightedRelation): PartialConstraint =
-    this.toDouble().bitor(rhs)
-
-/** Begin a partial constraint with this variable as the left-hand side expression. */
-infix fun Variable.bitor(rhs: WeightedRelation): PartialConstraint =
-    PartialConstraint.new(Expression.fromVariable(this), rhs)
-
-/** Begin a partial constraint with this term as the left-hand side expression. */
-infix fun Term.bitor(rhs: WeightedRelation): PartialConstraint =
-    PartialConstraint.new(Expression.fromTerm(this), rhs)
-
-/** Begin a partial constraint with this expression as the left-hand side expression. */
-infix fun Expression.bitor(rhs: WeightedRelation): PartialConstraint =
-    PartialConstraint.new(this, rhs)
