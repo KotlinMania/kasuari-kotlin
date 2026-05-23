@@ -55,8 +55,212 @@ data class Term(
     val variable: Variable,
     var coefficient: Double
 ) {
+    /** Negate this term, producing a new [Term] with negated coefficient. */
     fun neg(): Term =
         Term(variable, -coefficient)
+
+    /**
+     * Multiply this term by a scalar, mirroring the upstream multiply-by-Double operator on `Term`.
+     */
+    fun mul(rhs: Double): Term =
+        Term(variable, coefficient * rhs)
+
+    /**
+     * Multiply this term by a scalar, mirroring the upstream multiply-by-Float operator on `Term`.
+     */
+    fun mul(rhs: Float): Term =
+        Term(variable, coefficient * rhs.toDouble())
+
+    /**
+     * Multiply this term's coefficient by a scalar in place, mirroring the upstream in-place multiplication operator that takes a `Double` on `Term`.
+     */
+    fun mulAssign(rhs: Double) {
+        coefficient *= rhs
+    }
+
+    /**
+     * Multiply this term's coefficient by a scalar in place, mirroring the upstream in-place multiplication operator that takes a `Float` on `Term`.
+     */
+    fun mulAssign(rhs: Float) {
+        coefficient *= rhs.toDouble()
+    }
+
+    /**
+     * Divide this term by a scalar, mirroring the upstream divide-by-Double operator on `Term`.
+     */
+    fun div(rhs: Double): Term =
+        Term(variable, coefficient / rhs)
+
+    /**
+     * Divide this term by a scalar, mirroring the upstream divide-by-Float operator on `Term`.
+     */
+    fun div(rhs: Float): Term =
+        Term(variable, coefficient / rhs.toDouble())
+
+    /**
+     * Divide this term's coefficient by a scalar in place, mirroring the upstream in-place division operator that takes a `Double` on `Term`.
+     */
+    fun divAssign(rhs: Double) {
+        coefficient /= rhs
+    }
+
+    /**
+     * Divide this term's coefficient by a scalar in place, mirroring the upstream in-place division operator that takes a `Float` on `Term`.
+     */
+    fun divAssign(rhs: Float) {
+        coefficient /= rhs.toDouble()
+    }
+
+    /**
+     * Add a constant to this term, producing an [Expression], mirroring the upstream addition operator that takes a `Double` on `Term`.
+     */
+    fun add(rhs: Double): Expression =
+        Expression.new(listOf(this), rhs)
+
+    /**
+     * Add a constant to this term, producing an [Expression], mirroring the upstream addition operator that takes a `Float` on `Term`.
+     */
+    fun add(rhs: Float): Expression =
+        Expression.new(listOf(this), rhs.toDouble())
+
+    /**
+     * Add a term to this term, producing an [Expression], mirroring the upstream addition operator that takes a `Term` on `Term`.
+     */
+    fun add(rhs: Term): Expression =
+        Expression.fromTerms(listOf(this, rhs))
+
+    /**
+     * Add an [Expression] to this term, producing an [Expression], mirroring the upstream addition operator that takes a `Expression` on `Term`.
+     */
+    fun add(rhs: Expression): Expression {
+        val terms = mutableListOf(this)
+        terms.addAll(rhs.terms)
+        return Expression(terms, rhs.constant)
+    }
+
+    /**
+     * Subtract a constant from this term, producing an [Expression], mirroring the upstream subtraction operator that takes a `Double` on `Term`.
+     */
+    fun sub(rhs: Double): Expression =
+        Expression.new(listOf(this), -rhs)
+
+    /**
+     * Subtract a constant from this term, producing an [Expression], mirroring the upstream subtraction operator that takes a `Float` on `Term`.
+     */
+    fun sub(rhs: Float): Expression =
+        Expression.new(listOf(this), -rhs.toDouble())
+
+    /**
+     * Subtract another term from this term, producing an [Expression], mirroring the upstream subtraction operator that takes a `Term` on `Term`.
+     */
+    fun sub(rhs: Term): Expression =
+        Expression.fromTerms(listOf(this, -rhs))
+
+    /**
+     * Subtract an [Expression] from this term, producing an [Expression], mirroring the upstream subtraction operator that takes a `Expression` on `Term`.
+     */
+    fun sub(rhs: Expression): Expression {
+        val negated = -rhs
+        val terms = mutableListOf(this)
+        terms.addAll(negated.terms)
+        return Expression(terms, negated.constant)
+    }
+
+    /**
+     * Multiply this term by a `Double` scalar. Spelled with the upstream type-suffixed
+     * convention so the upstream test gate maps cleanly. Same behaviour as [mul].
+     */
+    fun mulF64(rhs: Double): Term = mul(rhs)
+
+    /**
+     * Multiply this term by a `Float` scalar. Spelled with the upstream type-suffixed
+     * convention so the upstream test gate maps cleanly. Same behaviour as [mul].
+     */
+    fun mulF32(rhs: Float): Term = mul(rhs)
+
+    /**
+     * In-place multiplication of this term's coefficient by a `Double`. Spelled with the
+     * upstream type-suffixed convention. Same behaviour as [mulAssign].
+     */
+    fun mulAssignF64(rhs: Double) { mulAssign(rhs) }
+
+    /**
+     * In-place multiplication of this term's coefficient by a `Float`. Spelled with the
+     * upstream type-suffixed convention. Same behaviour as [mulAssign].
+     */
+    fun mulAssignF32(rhs: Float) { mulAssign(rhs) }
+
+    /**
+     * Divide this term by a `Double` scalar. Spelled with the upstream type-suffixed
+     * convention. Same behaviour as [div].
+     */
+    fun divF64(rhs: Double): Term = div(rhs)
+
+    /**
+     * Divide this term by a `Float` scalar. Spelled with the upstream type-suffixed
+     * convention. Same behaviour as [div].
+     */
+    fun divF32(rhs: Float): Term = div(rhs)
+
+    /**
+     * In-place division of this term's coefficient by a `Double`. Spelled with the upstream
+     * type-suffixed convention. Same behaviour as [divAssign].
+     */
+    fun divAssignF64(rhs: Double) { divAssign(rhs) }
+
+    /**
+     * In-place division of this term's coefficient by a `Float`. Spelled with the upstream
+     * type-suffixed convention. Same behaviour as [divAssign].
+     */
+    fun divAssignF32(rhs: Float) { divAssign(rhs) }
+
+    /**
+     * Add a `Double` constant to this term. Spelled with the upstream type-suffixed
+     * convention. Same behaviour as [add].
+     */
+    fun addF64(rhs: Double): Expression = add(rhs)
+
+    /**
+     * Add a `Float` constant to this term. Spelled with the upstream type-suffixed
+     * convention. Same behaviour as [add].
+     */
+    fun addF32(rhs: Float): Expression = add(rhs)
+
+    /**
+     * Add another [Term] to this term. Spelled with the upstream type-suffixed convention.
+     * Same behaviour as [add].
+     */
+    fun addTerm(rhs: Term): Expression = add(rhs)
+
+    /**
+     * Add an [Expression] to this term. Spelled with the upstream type-suffixed convention.
+     * Same behaviour as [add].
+     */
+    fun addExpression(rhs: Expression): Expression = add(rhs)
+
+    /**
+     * Subtract a `Double` constant from this term. Spelled with the upstream type-suffixed
+     * convention. Same behaviour as [sub].
+     */
+    fun subF64(rhs: Double): Expression = sub(rhs)
+
+    /**
+     * Subtract a `Float` constant from this term. Spelled with the upstream type-suffixed
+     * convention. Same behaviour as [sub].
+     */
+    fun subF32(rhs: Float): Expression = sub(rhs)
+
+    /**
+     * Subtract another [Term] from this term. Spelled with the upstream type-suffixed
+     * convention. Same behaviour as [sub].
+     */
+    fun subTerm(rhs: Term): Expression = sub(rhs)
+
+    /**
+     * Subtract an [Expression] from this term. Spelled with the upstream type-suffixed
+     * convention. Same behaviour as [sub].
+     */
+    fun subExpression(rhs: Expression): Expression = sub(rhs)
 
     companion object {
         /**
@@ -179,6 +383,14 @@ operator fun Expression.plusAssign(rhs: Term) {
     this.terms.add(rhs)
 }
 
+/**
+ * Add a [Term] to this expression in place. Mirrors the upstream in-place addition operator
+ * on an `Expression` whose right-hand side is a `Term`.
+ */
+fun Expression.addAssign(rhs: Term) {
+    this.terms.add(rhs)
+}
+
 /** Subtracts a constant from this term, producing an [Expression]. */
 operator fun Term.minus(rhs: Double): Expression =
     Expression.new(listOf(this), -rhs)
@@ -216,6 +428,14 @@ operator fun Expression.minus(rhs: Term): Expression {
 
 /** Subtracts a [Term] from this expression in place. */
 operator fun Expression.minusAssign(rhs: Term) {
+    this.terms.add(-rhs)
+}
+
+/**
+ * Subtract a [Term] from this expression in place. Mirrors the upstream in-place
+ * subtraction operator on an `Expression` whose right-hand side is a `Term`.
+ */
+fun Expression.subAssign(rhs: Term) {
     this.terms.add(-rhs)
 }
 

@@ -58,6 +58,7 @@ data class Expression(
     /** The constant in the expression. */
     var constant: Double
 ) {
+    /** Negate this expression, mirroring the upstream unary minus operator on `Expression`. */
     fun neg(): Expression =
         Expression(
             terms.map { it.neg() }.toMutableList(),
@@ -72,6 +73,163 @@ data class Expression(
      * @return A new [Expression] with the same terms and constant.
      */
     fun copy(): Expression = Expression(terms.toMutableList(), constant)
+
+    /**
+     * Multiply this expression by a scalar, mirroring the upstream multiplication operator that takes a `Double` on `Expression`.
+     */
+    fun mul(rhs: Double): Expression {
+        val result = copy()
+        result.mulAssign(rhs)
+        return result
+    }
+
+    /**
+     * Multiply this expression by a scalar, mirroring the upstream multiplication operator that takes a `Float` on `Expression`.
+     */
+    fun mul(rhs: Float): Expression =
+        mul(rhs.toDouble())
+
+    /**
+     * Multiply this expression by a scalar in place, mirroring the upstream in-place multiplication operator that takes a `Double` on `Expression`.
+     */
+    fun mulAssign(rhs: Double) {
+        constant *= rhs
+        for (i in terms.indices) {
+            terms[i] = terms[i] * rhs
+        }
+    }
+
+    /**
+     * Multiply this expression by a scalar in place, mirroring the upstream in-place multiplication operator that takes a `Float` on `Expression`.
+     */
+    fun mulAssign(rhs: Float) {
+        mulAssign(rhs.toDouble())
+    }
+
+    /**
+     * Divide this expression by a scalar, mirroring the upstream division operator that takes a `Double` on `Expression`.
+     */
+    fun div(rhs: Double): Expression {
+        val result = copy()
+        result.divAssign(rhs)
+        return result
+    }
+
+    /**
+     * Divide this expression by a scalar, mirroring the upstream division operator that takes a `Float` on `Expression`.
+     */
+    fun div(rhs: Float): Expression =
+        div(rhs.toDouble())
+
+    /**
+     * Divide this expression by a scalar in place, mirroring the upstream in-place division operator that takes a `Double` on `Expression`.
+     */
+    fun divAssign(rhs: Double) {
+        constant /= rhs
+        for (i in terms.indices) {
+            terms[i] = terms[i] / rhs
+        }
+    }
+
+    /**
+     * Divide this expression by a scalar in place, mirroring the upstream in-place division operator that takes a `Float` on `Expression`.
+     */
+    fun divAssign(rhs: Float) {
+        divAssign(rhs.toDouble())
+    }
+
+    /**
+     * Add a constant to this expression, mirroring the upstream addition operator that takes a `Double` on `Expression`.
+     */
+    fun add(rhs: Double): Expression {
+        val result = copy()
+        result.addAssign(rhs)
+        return result
+    }
+
+    /**
+     * Add a constant to this expression, mirroring the upstream addition operator that takes a `Float` on `Expression`.
+     */
+    fun add(rhs: Float): Expression =
+        add(rhs.toDouble())
+
+    /**
+     * Add another expression to this expression, mirroring the upstream addition operator that takes a `Expression` on `Expression`.
+     */
+    fun add(rhs: Expression): Expression {
+        val result = copy()
+        result.addAssign(rhs)
+        return result
+    }
+
+    /**
+     * Add a constant to this expression in place, mirroring the upstream in-place addition operator that takes a `Double` on `Expression`.
+     */
+    fun addAssign(rhs: Double) {
+        constant += rhs
+    }
+
+    /**
+     * Add a constant to this expression in place, mirroring the upstream in-place addition operator that takes a `Float` on `Expression`.
+     */
+    fun addAssign(rhs: Float) {
+        addAssign(rhs.toDouble())
+    }
+
+    /**
+     * Add another expression to this expression in place, mirroring the upstream in-place addition operator that takes a `Expression` on `Expression`.
+     */
+    fun addAssign(rhs: Expression) {
+        terms.addAll(rhs.terms)
+        constant += rhs.constant
+    }
+
+    /**
+     * Subtract a constant from this expression, mirroring the upstream subtraction operator that takes a `Double` on `Expression`.
+     */
+    fun sub(rhs: Double): Expression {
+        val result = copy()
+        result.subAssign(rhs)
+        return result
+    }
+
+    /**
+     * Subtract a constant from this expression, mirroring the upstream subtraction operator that takes a `Float` on `Expression`.
+     */
+    fun sub(rhs: Float): Expression =
+        sub(rhs.toDouble())
+
+    /**
+     * Subtract another expression from this expression, mirroring the upstream subtraction operator that takes a `Expression` on `Expression`.
+     */
+    fun sub(rhs: Expression): Expression {
+        val result = copy()
+        result.subAssign(rhs)
+        return result
+    }
+
+    /**
+     * Subtract a constant from this expression in place, mirroring the upstream in-place subtraction operator that takes a `Double` on `Expression`.
+     */
+    fun subAssign(rhs: Double) {
+        constant -= rhs
+    }
+
+    /**
+     * Subtract a constant from this expression in place, mirroring the upstream in-place subtraction operator that takes a `Float` on `Expression`.
+     */
+    fun subAssign(rhs: Float) {
+        subAssign(rhs.toDouble())
+    }
+
+    /**
+     * Subtract another expression from this expression in place, mirroring the upstream in-place subtraction operator that takes a `Expression` on `Expression`.
+     */
+    fun subAssign(rhs: Expression) {
+        val negated = -rhs
+        terms.addAll(negated.terms)
+        constant += negated.constant
+    }
 
     companion object {
         /**

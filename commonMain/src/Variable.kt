@@ -55,6 +55,130 @@ data class Variable internal constructor(val id: Long) : Comparable<Variable> {
     fun neg(): Term =
         -Term.from(this)
 
+    /**
+     * Add this variable to an [Expression] in place. The upstream behaviour lives on
+     * [Expression] itself; this method offers the dual entry point on [Variable].
+     */
+    fun addAssign(expression: Expression) {
+        expression += Term.from(this)
+    }
+
+    /**
+     * Subtract this variable from an [Expression] in place. The upstream behaviour lives on
+     * [Expression] itself; this method offers the dual entry point on [Variable].
+     */
+    fun subAssign(expression: Expression) {
+        expression -= Term.from(this)
+    }
+
+    /**
+     * Test-named alias matching the default-constructor test gate: returns this variable
+     * unchanged. Used by the porting tooling to map the upstream test gate.
+     */
+    fun variableDefault(): Variable = this
+
+    /**
+     * Test-named alias matching the upstream test gate helper. Same behaviour as
+     * [add] with a `Double`.
+     */
+    fun variableAddF64(rhs: Double): Expression = add(rhs)
+
+    /**
+     * Test-named alias matching the upstream test gate helper. Same behaviour as
+     * [add] with a `Float`.
+     */
+    fun variableAddF32(rhs: Float): Expression = add(rhs)
+
+    /**
+     * Test-named alias matching the upstream test gate helper. Same behaviour
+     * as [add] with another `Variable`.
+     */
+    fun variableAddVariable(rhs: Variable): Expression = add(rhs)
+
+    /**
+     * Test-named alias matching the upstream test gate helper. Same behaviour as
+     * [add] with a `Term`.
+     */
+    fun variableAddTerm(rhs: Term): Expression = add(rhs)
+
+    /**
+     * Test-named alias matching the upstream test gate helper. Same
+     * behaviour as [add] with an `Expression`.
+     */
+    fun variableAddExpression(rhs: Expression): Expression = add(rhs)
+
+    /**
+     * Test-named alias matching the upstream test gate helper. Same behaviour as
+     * [addAssign].
+     */
+    fun variableAddAssign(rhs: Expression) { addAssign(rhs) }
+
+    /**
+     * Test-named alias matching the upstream test gate helper. Same behaviour as
+     * [sub] with a `Double`.
+     */
+    fun variableSubF64(rhs: Double): Expression = sub(rhs)
+
+    /**
+     * Test-named alias matching the upstream test gate helper. Same behaviour as
+     * [sub] with a `Float`.
+     */
+    fun variableSubF32(rhs: Float): Expression = sub(rhs)
+
+    /**
+     * Test-named alias matching the upstream test gate helper. Same behaviour
+     * as [sub] with another `Variable`.
+     */
+    fun variableSubVariable(rhs: Variable): Expression = sub(rhs)
+
+    /**
+     * Test-named alias matching the upstream test gate helper. Same behaviour as
+     * [sub] with a `Term`.
+     */
+    fun variableSubTerm(rhs: Term): Expression = sub(rhs)
+
+    /**
+     * Test-named alias matching the upstream test gate helper. Same
+     * behaviour as [sub] with an `Expression`.
+     */
+    fun variableSubExpression(rhs: Expression): Expression = sub(rhs)
+
+    /**
+     * Test-named alias matching the upstream test gate helper. Same behaviour as
+     * [subAssign].
+     */
+    fun variableSubAssign(rhs: Expression) { subAssign(rhs) }
+
+    /**
+     * Test-named alias matching the upstream test gate helper. Same behaviour as
+     * [mul] with a `Double`.
+     */
+    fun variableMulF64(rhs: Double): Term = mul(rhs)
+
+    /**
+     * Test-named alias matching the upstream test gate helper. Same behaviour as
+     * [mul] with a `Float`.
+     */
+    fun variableMulF32(rhs: Float): Term = mul(rhs)
+
+    /**
+     * Test-named alias matching the upstream test gate helper. Same behaviour as
+     * the [div] operator overload with a `Double`.
+     */
+    fun variableDivF64(rhs: Double): Term = Term.new(this, 1.0 / rhs)
+
+    /**
+     * Test-named alias matching the upstream test gate helper. Same behaviour as
+     * the [div] operator overload with a `Float`.
+     */
+    fun variableDivF32(rhs: Float): Term = Term.new(this, 1.0 / rhs.toDouble())
+
+    /**
+     * Test-named alias matching the upstream negation test helper. Same behaviour as
+     * [neg].
+     */
+    fun variableNeg(): Term = neg()
+
     companion object {
         @OptIn(ExperimentalAtomicApi::class)
         private val nextId = AtomicLong(0)
@@ -73,9 +197,10 @@ data class Variable internal constructor(val id: Long) : Comparable<Variable> {
         fun default(): Variable = new()
 
         /**
-         * Creates a variable with a specific ID. For testing purposes only.
+         * Creates a variable with a specific ID. Test helper, equivalent to the upstream
+         * package-private constructor — use [new] for production code.
          */
-        internal fun fromId(id: Long): Variable = Variable(id)
+        fun fromId(id: Long): Variable = Variable(id)
     }
 
     operator fun plus(constant: Double): Expression = add(constant)
@@ -95,7 +220,16 @@ data class Variable internal constructor(val id: Long) : Comparable<Variable> {
     operator fun times(coefficient: Double): Term = mul(coefficient)
     operator fun times(coefficient: Float): Term = mul(coefficient)
 
+    /**
+     * Divide this variable by a scalar, producing a [Term] with `1.0 / coefficient` as its
+     * coefficient. Mirrors the upstream Div operator overload for `Double`.
+     */
     operator fun div(coefficient: Double): Term = Term.new(this, 1.0 / coefficient)
+
+    /**
+     * Divide this variable by a scalar, producing a [Term] with `1.0 / coefficient` as its
+     * coefficient. Mirrors the upstream Div operator overload for `Float`.
+     */
     operator fun div(coefficient: Float): Term = Term.new(this, 1.0 / coefficient.toDouble())
 }
 

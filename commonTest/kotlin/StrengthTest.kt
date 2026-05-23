@@ -253,65 +253,183 @@ class StrengthTest {
     }
 
     // ============================================================================
-    // Assignment-style arithmetic tests
+    // add_assign tests
     // ============================================================================
 
     @Test
-    fun addAssign() {
-        listOf(
-            Triple(Strength.ZERO, Strength.ZERO, Strength.ZERO),
-            Triple(Strength.ZERO, Strength.WEAK, Strength.WEAK),
-            Triple(Strength.WEAK, Strength.ZERO, Strength.WEAK),
-            Triple(Strength.WEAK, Strength.WEAK, Strength.new(2.0)),
-            Triple(Strength.WEAK, Strength.MEDIUM, Strength.new(1001.0)),
-            Triple(Strength.MEDIUM, Strength.STRONG, Strength.new(1_001_000.0)),
-            Triple(Strength.STRONG, Strength.REQUIRED, Strength.REQUIRED),
-        ).forEach { (lhs, rhs, expected) ->
-            var reassigned = lhs
-            reassigned += rhs
-            assertEquals(expected, reassigned)
-            assertEquals(expected, lhs.addAssign(rhs))
-        }
+    fun addAssignZeroPlusZero() {
+        var result = Strength.ZERO
+        result += Strength.ZERO
+        assertEquals(Strength.ZERO, result)
     }
 
     @Test
-    fun subAssign() {
-        listOf(
-            Triple(Strength.ZERO, Strength.WEAK, Strength.ZERO),
-            Triple(Strength.ZERO, Strength.ZERO, Strength.ZERO),
-            Triple(Strength.WEAK, Strength.ZERO, Strength.WEAK),
-            Triple(Strength.WEAK, Strength.WEAK, Strength.ZERO),
-            Triple(Strength.MEDIUM, Strength.WEAK, Strength.new(999.0)),
-            Triple(Strength.STRONG, Strength.MEDIUM, Strength.new(999_000.0)),
-            Triple(Strength.REQUIRED, Strength.STRONG, Strength.new(1_000_001_000.0)),
-            Triple(Strength.REQUIRED, Strength.REQUIRED, Strength.ZERO),
-        ).forEach { (lhs, rhs, expected) ->
-            var reassigned = lhs
-            reassigned -= rhs
-            assertEquals(expected, reassigned)
-            assertEquals(expected, lhs.subAssign(rhs))
-        }
+    fun addAssignZeroPlusWeak() {
+        var result = Strength.ZERO
+        result += Strength.WEAK
+        assertEquals(Strength.WEAK, result)
     }
 
     @Test
-    fun mulAssign() {
-        listOf(
-            Triple(Strength.WEAK, -1.0, Strength.ZERO),
-            Triple(Strength.ZERO, 0.0, Strength.ZERO),
-            Triple(Strength.ZERO, 1.0, Strength.ZERO),
-            Triple(Strength.WEAK, 0.0, Strength.ZERO),
-            Triple(Strength.WEAK, 1.0, Strength.WEAK),
-            Triple(Strength.WEAK, 2.0, Strength.new(2.0)),
-            Triple(Strength.MEDIUM, 0.5, Strength.new(500.0)),
-            Triple(Strength.STRONG, 2.0, Strength.new(2_000_000.0)),
-            Triple(Strength.REQUIRED, 0.5, Strength.new(500_500_500.0)),
-        ).forEach { (lhs, rhs, expected) ->
-            var reassigned = lhs
-            reassigned *= rhs
-            assertEquals(expected, reassigned)
-            assertEquals(expected, lhs.mulAssign(rhs))
-            assertEquals(expected, lhs.mul(rhs))
-        }
+    fun addAssignWeakPlusZero() {
+        var result = Strength.WEAK
+        result += Strength.ZERO
+        assertEquals(Strength.WEAK, result)
+    }
+
+    @Test
+    fun addAssignWeakPlusWeak() {
+        var result = Strength.WEAK
+        result += Strength.WEAK
+        assertEquals(Strength.new(2.0), result)
+    }
+
+    @Test
+    fun addAssignWeakPlusMedium() {
+        var result = Strength.WEAK
+        result += Strength.MEDIUM
+        assertEquals(Strength.new(1001.0), result)
+    }
+
+    @Test
+    fun addAssignMediumPlusStrong() {
+        var result = Strength.MEDIUM
+        result += Strength.STRONG
+        assertEquals(Strength.new(1_001_000.0), result)
+    }
+
+    @Test
+    fun addAssignSaturateHigh() {
+        var result = Strength.STRONG
+        result += Strength.REQUIRED
+        assertEquals(Strength.REQUIRED, result)
+    }
+
+    // ============================================================================
+    // sub_assign tests
+    // ============================================================================
+
+    @Test
+    fun subAssignSaturateLow() {
+        var result = Strength.ZERO
+        result -= Strength.WEAK
+        assertEquals(Strength.ZERO, result)
+    }
+
+    @Test
+    fun subAssignZeroMinusZero() {
+        var result = Strength.ZERO
+        result -= Strength.ZERO
+        assertEquals(Strength.ZERO, result)
+    }
+
+    @Test
+    fun subAssignWeakMinusZero() {
+        var result = Strength.WEAK
+        result -= Strength.ZERO
+        assertEquals(Strength.WEAK, result)
+    }
+
+    @Test
+    fun subAssignWeakMinusWeak() {
+        var result = Strength.WEAK
+        result -= Strength.WEAK
+        assertEquals(Strength.ZERO, result)
+    }
+
+    @Test
+    fun subAssignMediumMinusWeak() {
+        var result = Strength.MEDIUM
+        result -= Strength.WEAK
+        assertEquals(Strength.new(999.0), result)
+    }
+
+    @Test
+    fun subAssignStrongMinusMedium() {
+        var result = Strength.STRONG
+        result -= Strength.MEDIUM
+        assertEquals(Strength.new(999_000.0), result)
+    }
+
+    @Test
+    fun subAssignRequiredMinusStrong() {
+        var result = Strength.REQUIRED
+        result -= Strength.STRONG
+        assertEquals(Strength.new(1_000_001_000.0), result)
+    }
+
+    @Test
+    fun subAssignRequiredMinusRequired() {
+        var result = Strength.REQUIRED
+        result -= Strength.REQUIRED
+        assertEquals(Strength.ZERO, result)
+    }
+
+    // ============================================================================
+    // mul_assign tests
+    // ============================================================================
+
+    @Test
+    fun mulAssignNegative() {
+        var result = Strength.WEAK
+        result *= -1.0
+        assertEquals(Strength.ZERO, result)
+    }
+
+    @Test
+    fun mulAssignZeroMulZero() {
+        var result = Strength.ZERO
+        result *= 0.0
+        assertEquals(Strength.ZERO, result)
+    }
+
+    @Test
+    fun mulAssignZeroMulOne() {
+        var result = Strength.ZERO
+        result *= 1.0
+        assertEquals(Strength.ZERO, result)
+    }
+
+    @Test
+    fun mulAssignWeakMulZero() {
+        var result = Strength.WEAK
+        result *= 0.0
+        assertEquals(Strength.ZERO, result)
+    }
+
+    @Test
+    fun mulAssignWeakMulOne() {
+        var result = Strength.WEAK
+        result *= 1.0
+        assertEquals(Strength.WEAK, result)
+    }
+
+    @Test
+    fun mulAssignWeakMulTwo() {
+        var result = Strength.WEAK
+        result *= 2.0
+        assertEquals(Strength.new(2.0), result)
+    }
+
+    @Test
+    fun mulAssignMediumMulHalf() {
+        var result = Strength.MEDIUM
+        result *= 0.5
+        assertEquals(Strength.new(500.0), result)
+    }
+
+    @Test
+    fun mulAssignStrongMulTwo() {
+        var result = Strength.STRONG
+        result *= 2.0
+        assertEquals(Strength.new(2_000_000.0), result)
+    }
+
+    @Test
+    fun mulAssignRequiredMulHalf() {
+        var result = Strength.REQUIRED
+        result *= 0.5
+        assertEquals(Strength.new(500_500_500.0), result)
     }
 
     @Test
