@@ -1,5 +1,9 @@
 // port-lint: source relations.rs
+@file:OptIn(kotlin.experimental.ExperimentalObjCRefinement::class)
+
 package kasuari
+
+import kotlin.native.HiddenFromObjC
 
 /** The possible relations that a constraint can specify. */
 enum class RelationalOperator {
@@ -39,6 +43,7 @@ sealed class WeightedRelation(val strength: Strength) {
     class GE(strength: Strength) : WeightedRelation(strength)
 
     /** Decompose a weighted relation into its underlying operator and strength. */
+    @HiddenFromObjC
     fun toOperatorAndStrength(): Pair<RelationalOperator, Strength> = when (this) {
         is EQ -> RelationalOperator.Equal to strength
         is LE -> RelationalOperator.LessOrEqual to strength
@@ -47,6 +52,7 @@ sealed class WeightedRelation(val strength: Strength) {
 
     companion object {
         /** Decompose a weighted relation into its underlying operator and strength. */
+        @HiddenFromObjC
         fun from(relation: WeightedRelation): Pair<RelationalOperator, Strength> =
             relation.toOperatorAndStrength()
     }

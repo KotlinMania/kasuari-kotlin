@@ -226,7 +226,7 @@ class ExpressionTest {
         val copy = original.copy()
 
         // Modify copy
-        copy.terms.add(Term.new(Variable.new(), 1.0))
+        copy += Term.new(Variable.new(), 1.0)
         copy.constant = 10.0
 
         // Original should be unchanged

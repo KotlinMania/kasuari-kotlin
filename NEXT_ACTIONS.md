@@ -5,10 +5,10 @@ Based on AST analysis, here are the concrete next steps.
 ## Summary
 
 - **Files Present:** 13/13 (100.0%)
-- **Function parity:** 107/145 matched (target 296) — 73.8%
+- **Function parity:** 113/145 matched (target 308) — 77.9%
 - **Class/type parity:** 23/29 matched (target 44) — 79.3%
-- **Combined symbol parity:** 130/174 matched (target 340) — 74.7%
-- **Average inline-code cosine:** 0.55 (function body across 11 matched files)
+- **Combined symbol parity:** 136/174 matched (target 352) — 78.2%
+- **Average inline-code cosine:** 0.56 (function body across 11 matched files)
 - **Average documentation cosine:** 0.59 (doc text across 11 matched files)
 - **Cheat-zeroed Files:** 1
 - **Critical Issues:** 8 files with <0.60 function similarity
@@ -27,23 +27,7 @@ No missing high-value files detected.
 
 Every matched file is listed below with function and type symbol parity.
 
-### 1. kasuari-rs.strength
-
-- **Target:** `commonMain.Strength [PROVENANCE-FALLBACK]`
-- **Similarity:** 0.07
-- **Dependents:** 2
-- **Priority Score:** 2131709.2
-- **Functions:** 3/15 matched (target 80)
-- **Missing functions:** `add`, `sub`, `mul_f64`, `mul_f32`, `div_f64`, `div_f32`, `add_assign`, `sub_assign`, `mul`, `mul_assign`, `cmp`, `partial_cmp`
-- **Types:** 1/2 matched
-- **Missing types:** `Output`
-- **Provenance warning:** port-lint provenance header matched only after fallback normalization: `strength.rs` vs expected `strength.rs`
-- **Provenance warning:** port-lint provenance header matched only after fallback normalization: `tests:strength.rs` vs expected `strength.rs`
-- **Proposed provenance header:** `// port-lint: source strength.rs` (current: `// port-lint: source strength.rs`)
-- **Proposed provenance header:** `// port-lint: tests strength.rs` (current: `// port-lint: tests strength.rs`)
-- **Lint issues:** 2
-
-### 2. kasuari-rs.variable
+### 1. kasuari-rs.variable
 
 - **Target:** `commonMain.Variable [PROVENANCE-FALLBACK]`
 - **Similarity:** 0.38
@@ -60,12 +44,28 @@ Every matched file is listed below with function and type symbol parity.
 - **Proposed provenance header:** `// port-lint: tests variable.rs` (current: `// port-lint: tests variable.rs`)
 - **Lint issues:** 2
 
+### 2. kasuari-rs.strength
+
+- **Target:** `commonMain.Strength [PROVENANCE-FALLBACK]`
+- **Similarity:** 0.25
+- **Dependents:** 2
+- **Priority Score:** 2071707.5
+- **Functions:** 9/15 matched (target 92)
+- **Missing functions:** `add_assign`, `sub_assign`, `mul`, `mul_assign`, `cmp`, `partial_cmp`
+- **Types:** 1/2 matched
+- **Missing types:** `Output`
+- **Provenance warning:** port-lint provenance header matched only after fallback normalization: `strength.rs` vs expected `strength.rs`
+- **Provenance warning:** port-lint provenance header matched only after fallback normalization: `tests:strength.rs` vs expected `strength.rs`
+- **Proposed provenance header:** `// port-lint: source strength.rs` (current: `// port-lint: source strength.rs`)
+- **Proposed provenance header:** `// port-lint: tests strength.rs` (current: `// port-lint: tests strength.rs`)
+- **Lint issues:** 2
+
 ### 3. kasuari-rs.expression
 
 - **Target:** `commonMain.Expression [PROVENANCE-FALLBACK]`
-- **Similarity:** 0.26
+- **Similarity:** 0.25
 - **Dependents:** 1
-- **Priority Score:** 1091807.4
+- **Priority Score:** 1091807.5
 - **Functions:** 8/16 matched (target 40)
 - **Missing functions:** `from_iter`, `neg`, `mul`, `mul_assign`, `add`, `add_assign`, `sub`, `sub_assign`
 - **Types:** 1/2 matched (target 1)

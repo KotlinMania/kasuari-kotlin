@@ -1,6 +1,6 @@
 # port-lint Proposed Changes
 
-**Generated:** 2026-05-22
+**Generated:** 2026-05-24
 **Source:** tmp/scan-rust
 **Target:** tmp/scan-kotlin
 
@@ -8,10 +8,10 @@ These are review proposals only. They are emitted when a Rust -> Kotlin pair mat
 
 | Target file | Current header | Proposed header | Source path | Reason |
 |-------------|----------------|-----------------|-------------|--------|
-| `../../commonMain/src/Strength.kt` | `// port-lint: source strength.rs` | `// port-lint: source strength.rs` | `strength.rs` | `port-lint provenance header matched only after fallback normalization: 'strength.rs' vs expected 'strength.rs'` |
-| `../../commonTest/kotlin/StrengthTest.kt` | `// port-lint: tests strength.rs` | `// port-lint: tests strength.rs` | `strength.rs` | `port-lint provenance header matched only after fallback normalization: 'tests:strength.rs' vs expected 'strength.rs'` |
 | `../../commonMain/src/Variable.kt` | `// port-lint: source variable.rs` | `// port-lint: source variable.rs` | `variable.rs` | `port-lint provenance header matched only after fallback normalization: 'variable.rs' vs expected 'variable.rs'` |
 | `../../commonTest/kotlin/VariableTest.kt` | `// port-lint: tests variable.rs` | `// port-lint: tests variable.rs` | `variable.rs` | `port-lint provenance header matched only after fallback normalization: 'tests:variable.rs' vs expected 'variable.rs'` |
+| `../../commonMain/src/Strength.kt` | `// port-lint: source strength.rs` | `// port-lint: source strength.rs` | `strength.rs` | `port-lint provenance header matched only after fallback normalization: 'strength.rs' vs expected 'strength.rs'` |
+| `../../commonTest/kotlin/StrengthTest.kt` | `// port-lint: tests strength.rs` | `// port-lint: tests strength.rs` | `strength.rs` | `port-lint provenance header matched only after fallback normalization: 'tests:strength.rs' vs expected 'strength.rs'` |
 | `../../commonMain/src/Expression.kt` | `// port-lint: source expression.rs` | `// port-lint: source expression.rs` | `expression.rs` | `port-lint provenance header matched only after fallback normalization: 'expression.rs' vs expected 'expression.rs'` |
 | `../../commonMain/src/Term.kt` | `// port-lint: source term.rs` | `// port-lint: source term.rs` | `term.rs` | `port-lint provenance header matched only after fallback normalization: 'term.rs' vs expected 'term.rs'` |
 | `../../commonTest/kotlin/TermTest.kt` | `// port-lint: tests term.rs` | `// port-lint: tests term.rs` | `term.rs` | `port-lint provenance header matched only after fallback normalization: 'tests:term.rs' vs expected 'term.rs'` |
