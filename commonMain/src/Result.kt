@@ -1,5 +1,9 @@
 // port-lint: ignore — Kotlin-side result wrapper; Rust uses stdlib `Result` with no kasuari source.
+@file:OptIn(kotlin.experimental.ExperimentalObjCRefinement::class)
+
 package kasuari
+
+import kotlin.native.HiddenFromObjC
 
 /**
  * A result type that represents either success ([Ok]) or failure ([Err]).
@@ -93,6 +97,7 @@ package kasuari
  * @see Solver.tryRemoveEditVariable
  * @see Solver.trySuggestValue
  */
+@HiddenFromObjC
 sealed class Result<out T, out E> {
     /**
      * Represents a successful result containing a value.
@@ -278,6 +283,7 @@ sealed class Result<out T, out E> {
  * @return [Result.Ok] if successful, [Result.Err] with the error otherwise.
  * @see Solver.addConstraint
  */
+@HiddenFromObjC
 fun Solver.tryAddConstraint(constraint: Constraint): Result<Unit, AddConstraintError> {
     return try {
         addConstraint(constraint)
@@ -296,6 +302,7 @@ fun Solver.tryAddConstraint(constraint: Constraint): Result<Unit, AddConstraintE
  * @return [Result.Ok] if all constraints were added, [Result.Err] with the first error.
  * @see Solver.addConstraints
  */
+@HiddenFromObjC
 fun Solver.tryAddConstraints(constraints: Iterable<Constraint>): Result<Unit, AddConstraintError> {
     return try {
         addConstraints(constraints)
@@ -314,6 +321,7 @@ fun Solver.tryAddConstraints(constraints: Iterable<Constraint>): Result<Unit, Ad
  * @return [Result.Ok] if successful, [Result.Err] with the error otherwise.
  * @see Solver.removeConstraint
  */
+@HiddenFromObjC
 fun Solver.tryRemoveConstraint(constraint: Constraint): Result<Unit, RemoveConstraintError> {
     return try {
         removeConstraint(constraint)
@@ -333,6 +341,7 @@ fun Solver.tryRemoveConstraint(constraint: Constraint): Result<Unit, RemoveConst
  * @return [Result.Ok] if successful, [Result.Err] with the error otherwise.
  * @see Solver.addEditVariable
  */
+@HiddenFromObjC
 fun Solver.tryAddEditVariable(variable: Variable, strength: Strength): Result<Unit, AddEditVariableError> {
     return try {
         addEditVariable(variable, strength)
@@ -351,6 +360,7 @@ fun Solver.tryAddEditVariable(variable: Variable, strength: Strength): Result<Un
  * @return [Result.Ok] if successful, [Result.Err] with the error otherwise.
  * @see Solver.removeEditVariable
  */
+@HiddenFromObjC
 fun Solver.tryRemoveEditVariable(variable: Variable): Result<Unit, RemoveEditVariableError> {
     return try {
         removeEditVariable(variable)
@@ -370,6 +380,7 @@ fun Solver.tryRemoveEditVariable(variable: Variable): Result<Unit, RemoveEditVar
  * @return [Result.Ok] if successful, [Result.Err] with the error otherwise.
  * @see Solver.suggestValue
  */
+@HiddenFromObjC
 fun Solver.trySuggestValue(variable: Variable, value: Double): Result<Unit, SuggestValueError> {
     return try {
         suggestValue(variable, value)

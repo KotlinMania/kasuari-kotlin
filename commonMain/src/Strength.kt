@@ -91,37 +91,37 @@ data class Strength(private val value: Double) : Comparable<Strength> {
     /**
      * Add two strengths together, clamping the result to the legal range.
      */
-    operator fun plus(rhs: Strength): Strength =
+    fun add(rhs: Strength): Strength =
         new(this.value + rhs.value)
 
     /**
      * Subtract one strength from another, clamping the result to the legal range.
      */
-    operator fun minus(rhs: Strength): Strength =
+    fun sub(rhs: Strength): Strength =
         new(this.value - rhs.value)
 
     /**
-     * Multiply this strength by a scalar, clamping the result to the legal range.
+     * Multiply this strength by a Double scalar, clamping the result to the legal range.
      */
-    operator fun times(rhs: Double): Strength =
+    fun mulF64(rhs: Double): Strength =
         new(this.value * rhs)
 
     /**
-     * Multiply this strength by a scalar, clamping the result to the legal range.
+     * Multiply this strength by a Float scalar, clamping the result to the legal range.
      */
-    operator fun times(rhs: Float): Strength =
+    fun mulF32(rhs: Float): Strength =
         new(this.value * rhs.toDouble())
 
     /**
-     * Divide this strength by a scalar, clamping the result to the legal range.
+     * Divide this strength by a Double scalar, clamping the result to the legal range.
      */
-    operator fun div(rhs: Double): Strength =
+    fun divF64(rhs: Double): Strength =
         new(this.value / rhs)
 
     /**
-     * Divide this strength by a scalar, clamping the result to the legal range.
+     * Divide this strength by a Float scalar, clamping the result to the legal range.
      */
-    operator fun div(rhs: Float): Strength =
+    fun divF32(rhs: Float): Strength =
         new(this.value / rhs.toDouble())
 
     /**
@@ -129,6 +129,24 @@ data class Strength(private val value: Double) : Comparable<Strength> {
      */
     override fun compareTo(other: Strength): Int =
         value.compareTo(other.value)
+
+    operator fun plus(rhs: Strength): Strength =
+        add(rhs)
+
+    operator fun minus(rhs: Strength): Strength =
+        sub(rhs)
+
+    operator fun times(rhs: Double): Strength =
+        mulF64(rhs)
+
+    operator fun times(rhs: Float): Strength =
+        mulF32(rhs)
+
+    operator fun div(rhs: Double): Strength =
+        divF64(rhs)
+
+    operator fun div(rhs: Float): Strength =
+        divF32(rhs)
 }
 
 /**

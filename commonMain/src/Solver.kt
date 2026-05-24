@@ -1,5 +1,9 @@
 // port-lint: source solver.rs
+@file:OptIn(kotlin.experimental.ExperimentalObjCRefinement::class)
+
 package kasuari
+
+import kotlin.native.HiddenFromObjC
 
 /**
  * Internal solver errors that indicate bugs in the solver implementation.
@@ -9,6 +13,7 @@ package kasuari
  *
  * @see Solver
  */
+@HiddenFromObjC
 sealed class InternalSolverError : Exception() {
     /**
      * The objective function is unbounded.
@@ -446,6 +451,7 @@ class Solver {
      *
      * @return A list of (variable, new value) pairs for all changed variables.
      */
+    @HiddenFromObjC
     fun fetchChanges(): List<Pair<Variable, Double>> {
         if (shouldClearChanges) {
             changed.clear()

@@ -145,6 +145,11 @@ class StrengthTest {
         assertEquals(Strength.STRONG + Strength.REQUIRED, Strength.REQUIRED)
     }
 
+    @Test
+    fun addMethodMatchesOperator() {
+        assertEquals(Strength.WEAK.add(Strength.MEDIUM), Strength.WEAK + Strength.MEDIUM)
+    }
+
     // ============================================================================
     // sub tests
     // ============================================================================
@@ -187,6 +192,11 @@ class StrengthTest {
     @Test
     fun subRequiredMinusRequired() {
         assertEquals(Strength.REQUIRED - Strength.REQUIRED, Strength.ZERO)
+    }
+
+    @Test
+    fun subMethodMatchesOperator() {
+        assertEquals(Strength.REQUIRED.sub(Strength.STRONG), Strength.REQUIRED - Strength.STRONG)
     }
 
     // ============================================================================
@@ -236,6 +246,26 @@ class StrengthTest {
     @Test
     fun mulRequiredTimesHalf() {
         assertEquals(Strength.REQUIRED * 0.5, Strength.new(500_500_500.0))
+    }
+
+    @Test
+    fun mulF64MethodMatchesOperator() {
+        assertEquals(Strength.STRONG.mulF64(2.0), Strength.STRONG * 2.0)
+    }
+
+    @Test
+    fun mulF32MethodMatchesOperator() {
+        assertEquals(Strength.STRONG.mulF32(2.0f), Strength.STRONG * 2.0f)
+    }
+
+    @Test
+    fun divF64MethodClampsResult() {
+        assertEquals(Strength.WEAK.divF64(2.0), Strength.new(0.5))
+    }
+
+    @Test
+    fun divF32MethodClampsResult() {
+        assertEquals(Strength.WEAK.divF32(2.0f), Strength.new(0.5))
     }
 
     // ============================================================================
