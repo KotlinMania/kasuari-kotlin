@@ -1,9 +1,14 @@
 // port-lint: source error.rs
+@file:OptIn(kotlin.experimental.ExperimentalObjCRefinement::class)
+
 package kasuari
+
+import kotlin.native.HiddenFromObjC
 
 /**
  * The possible error conditions that [Solver.addConstraint] can fail with.
  */
+@HiddenFromObjC
 sealed class AddConstraintError(message: String) : Exception(message) {
     /**
      * The constraint specified has already been added to the solver.
@@ -30,6 +35,7 @@ sealed class AddConstraintError(message: String) : Exception(message) {
 /**
  * The possible error conditions that [Solver.removeConstraint] can fail with.
  */
+@HiddenFromObjC
 sealed class RemoveConstraintError(message: String) : Exception(message) {
     /**
      * The constraint specified was not already in the solver, so cannot be removed.
@@ -50,6 +56,7 @@ sealed class RemoveConstraintError(message: String) : Exception(message) {
 /**
  * The possible error conditions that [Solver.addEditVariable] can fail with.
  */
+@HiddenFromObjC
 sealed class AddEditVariableError(message: String) : Exception(message) {
     /**
      * The specified variable is already marked as an edit variable in the solver.
@@ -69,6 +76,7 @@ sealed class AddEditVariableError(message: String) : Exception(message) {
 /**
  * The possible error conditions that [Solver.removeEditVariable] can fail with.
  */
+@HiddenFromObjC
 sealed class RemoveEditVariableError(message: String) : Exception(message) {
     /**
      * The specified variable was not an edit variable in the solver, so cannot be removed.
@@ -89,6 +97,7 @@ sealed class RemoveEditVariableError(message: String) : Exception(message) {
 /**
  * The possible error conditions that [Solver.suggestValue] can fail with.
  */
+@HiddenFromObjC
 sealed class SuggestValueError(message: String) : Exception(message) {
     /**
      * The specified variable was not an edit variable in the solver, so cannot have its value

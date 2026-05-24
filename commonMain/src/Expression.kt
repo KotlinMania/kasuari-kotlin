@@ -54,7 +54,7 @@ package kasuari
  */
 data class Expression(
     /** The terms in the expression. */
-    val terms: MutableList<Term>,
+    var terms: List<Term>,
     /** The constant in the expression. */
     var constant: Double,
 ) {
@@ -154,9 +154,11 @@ operator fun Expression.unaryMinus(): Expression =
 operator fun Expression.times(rhs: Double): Expression {
     val result = this.copy()
     result.constant *= rhs
-    for (i in result.terms.indices) {
-        result.terms[i] = result.terms[i] * rhs
+    val scaledTerms = result.terms.toMutableList()
+    for (i in scaledTerms.indices) {
+        scaledTerms[i] = scaledTerms[i] * rhs
     }
+    result.terms = scaledTerms
     return result
 }
 
@@ -173,9 +175,11 @@ operator fun Float.times(rhs: Expression): Expression = rhs * this.toDouble()
 operator fun Expression.div(rhs: Double): Expression {
     val result = this.copy()
     result.constant /= rhs
-    for (i in result.terms.indices) {
-        result.terms[i] = result.terms[i] / rhs
+    val scaledTerms = result.terms.toMutableList()
+    for (i in scaledTerms.indices) {
+        scaledTerms[i] = scaledTerms[i] / rhs
     }
+    result.terms = scaledTerms
     return result
 }
 
@@ -205,7 +209,7 @@ operator fun Float.plus(rhs: Expression): Expression = this.toDouble() + rhs
 /** Adds two expressions together, producing a new [Expression]. */
 operator fun Expression.plus(rhs: Expression): Expression {
     val result = this.copy()
-    result.terms.addAll(rhs.terms)
+    result.terms = result.terms + rhs.terms
     result.constant += rhs.constant
     return result
 }
@@ -234,7 +238,7 @@ operator fun Float.minus(rhs: Expression): Expression = this.toDouble() - rhs
 operator fun Expression.minus(rhs: Expression): Expression {
     val result = this.copy()
     val negated = -rhs
-    result.terms.addAll(negated.terms)
+    result.terms = result.terms + negated.terms
     result.constant += negated.constant
     return result
 }
@@ -246,9 +250,11 @@ operator fun Expression.minus(rhs: Expression): Expression {
 /** Multiplies this expression by a scalar in place. */
 operator fun Expression.timesAssign(rhs: Double) {
     constant *= rhs
-    for (i in terms.indices) {
-        terms[i] = terms[i] * rhs
+    val scaledTerms = terms.toMutableList()
+    for (i in scaledTerms.indices) {
+        scaledTerms[i] = scaledTerms[i] * rhs
     }
+    terms = scaledTerms
 }
 
 /** Multiplies this expression by a scalar (Float) in place. */
@@ -259,9 +265,11 @@ operator fun Expression.timesAssign(rhs: Float) {
 /** Divides this expression by a scalar in place. */
 operator fun Expression.divAssign(rhs: Double) {
     constant /= rhs
-    for (i in terms.indices) {
-        terms[i] = terms[i] / rhs
+    val scaledTerms = terms.toMutableList()
+    for (i in scaledTerms.indices) {
+        scaledTerms[i] = scaledTerms[i] / rhs
     }
+    terms = scaledTerms
 }
 
 /** Divides this expression by a scalar (Float) in place. */
@@ -281,7 +289,7 @@ operator fun Expression.plusAssign(rhs: Float) {
 
 /** Adds another expression to this expression in place. */
 operator fun Expression.plusAssign(rhs: Expression) {
-    terms.addAll(rhs.terms)
+    terms = terms + rhs.terms
     constant += rhs.constant
 }
 
@@ -298,7 +306,7 @@ operator fun Expression.minusAssign(rhs: Float) {
 /** Subtracts another expression from this expression in place. */
 operator fun Expression.minusAssign(rhs: Expression) {
     val negated = -rhs
-    terms.addAll(negated.terms)
+    terms = terms + negated.terms
     constant += negated.constant
 }
 

@@ -63,9 +63,9 @@ Every matched file is listed below with function and type symbol parity.
 ### 3. kasuari-rs.expression
 
 - **Target:** `commonMain.Expression [PROVENANCE-FALLBACK]`
-- **Similarity:** 0.26
+- **Similarity:** 0.25
 - **Dependents:** 1
-- **Priority Score:** 1091807.4
+- **Priority Score:** 1091807.5
 - **Functions:** 8/16 matched (target 40)
 - **Missing functions:** `from_iter`, `neg`, `mul`, `mul_assign`, `add`, `add_assign`, `sub`, `sub_assign`
 - **Types:** 1/2 matched (target 1)

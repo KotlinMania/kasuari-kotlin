@@ -28,16 +28,17 @@ plugins {
 }
 
 group = "io.github.kotlinmania"
-version = "0.1.3"
+version = "0.1.4"
 
 val androidCommandLineToolsRevision = "14742923"
 val projectCompileSdk = "34"
 val projectAndroidBuildTools = "36.0.0"
 val isWindowsHost = System.getProperty("os.name").lowercase().contains("windows")
+val isMacHost = System.getProperty("os.name").lowercase().contains("mac")
 val androidSdkOsName =
     when {
         isWindowsHost -> "win"
-        System.getProperty("os.name").lowercase().contains("mac") -> "mac"
+        isMacHost -> "mac"
         System.getProperty("os.name").lowercase().contains("linux") -> "linux"
         else -> throw GradleException("Unsupported Android SDK setup OS: ${System.getProperty("os.name")}")
     }
@@ -445,19 +446,56 @@ dependencies {
     codeqlSourceClasspath("org.jetbrains.kotlin:kotlin-stdlib:2.3.21")
 }
 
+val codeqlCommonMainSourceDir = layout.projectDirectory.dir("commonMain/src")
+val codeqlSanitizedSourceDir = layout.buildDirectory.dir("generated/codeql-commonMain-src")
+
+val prepareCodeqlCommonMainSources = tasks.register("prepareCodeqlCommonMainSources") {
+    description =
+        "Copies commonMain sources for CodeQL, removing Swift Export annotations unsupported by plain JVM kotlinc."
+    group = "verification"
+
+    inputs.dir(codeqlCommonMainSourceDir).withPathSensitivity(PathSensitivity.RELATIVE)
+    outputs.dir(codeqlSanitizedSourceDir)
+
+    doLast {
+        val sourceRoot = codeqlCommonMainSourceDir.asFile
+        val targetRoot = codeqlSanitizedSourceDir.get().asFile
+        targetRoot.deleteRecursively()
+        targetRoot.mkdirs()
+
+        fileTree(sourceRoot) { include("**/*") }.files.forEach { source ->
+            val target = targetRoot.resolve(source.relativeTo(sourceRoot).path)
+            target.parentFile.mkdirs()
+            if (source.extension == "kt") {
+                val sanitized = source.readLines()
+                    .filterNot { line ->
+                        val trimmed = line.trim()
+                        trimmed == "@file:OptIn(kotlin.experimental.ExperimentalObjCRefinement::class)" ||
+                            trimmed == "import kotlin.native.HiddenFromObjC" ||
+                            trimmed == "@HiddenFromObjC"
+                    }
+                    .joinToString(System.lineSeparator())
+                target.writeText(sanitized + System.lineSeparator())
+            } else {
+                source.copyTo(target, overwrite = true)
+            }
+        }
+    }
+}
+
 val codeqlCompileJvm = tasks.register<JavaExec>("codeqlCompileJvm") {
     description =
         "Compile commonMain Kotlin sources with kotlinc 2.3.21 for CodeQL Java/Kotlin extraction."
     group = "verification"
 
+    dependsOn(prepareCodeqlCommonMainSources)
     classpath(codeqlKotlinc)
     mainClass.set("org.jetbrains.kotlin.cli.jvm.K2JVMCompiler")
 
     val outDir = layout.buildDirectory.dir("classes/kotlin/codeql-jvm")
     val aarExtractDir = layout.buildDirectory.dir("codeql/android-aar")
-    val sources = fileTree("commonMain/src") { include("**/*.kt") }
     val sentinelDir = layout.buildDirectory.dir("generated/codeql-empty-source")
-    inputs.files(sources).withPathSensitivity(PathSensitivity.RELATIVE)
+    inputs.dir(codeqlCommonMainSourceDir).withPathSensitivity(PathSensitivity.RELATIVE)
     inputs.files(codeqlSourceClasspath).withNormalizer(ClasspathNormalizer::class.java)
     inputs.files(codeqlAndroidAar).withNormalizer(ClasspathNormalizer::class.java)
     outputs.dir(outDir)
@@ -483,7 +521,9 @@ val codeqlCompileJvm = tasks.register<JavaExec>("codeqlCompileJvm") {
         val fullClasspath =
             (codeqlSourceClasspath.resolve() + extractedJars)
                 .joinToString(File.pathSeparator) { it.absolutePath }
-        val sourceFiles = sources.files.toMutableList()
+        val sourceFiles = fileTree(codeqlSanitizedSourceDir.get().asFile) { include("**/*.kt") }
+            .files
+            .toMutableList()
         if (sourceFiles.isEmpty()) {
             val sentinelFile = sentinelDir.get().asFile.resolve("kasuari/CodeqlEmptySentinel.kt")
             sentinelFile.parentFile.mkdirs()
@@ -522,10 +562,54 @@ tasks.register("setupAndroidSdk") {
     }
 }
 
+val swiftExportSmokeTest = tasks.register("swiftExportSmokeTest") {
+    group = "verification"
+    description = "Builds the Swift Export SPM package and runs swift test against it."
+    onlyIf {
+        if (!isMacHost) {
+            logger.lifecycle("swiftExportSmokeTest: skipped because Swift Export smoke tests require macOS")
+        }
+        isMacHost
+    }
+    outputs.upToDateWhen { false }
+
+    doLast {
+        val execOperations = serviceOf<ExecOperations>()
+        val swiftBuildDir = layout.buildDirectory.dir("swift-test").get().asFile.absolutePath
+        execOperations.exec {
+            workingDir = projectDir
+            commandLine(
+                "./gradlew",
+                "embedSwiftExportForXcode",
+                "--no-configuration-cache",
+                "--no-daemon",
+                "--console=plain",
+            )
+            environment(
+                mapOf(
+                    "BUILT_PRODUCTS_DIR" to swiftBuildDir,
+                    "TARGET_BUILD_DIR" to swiftBuildDir,
+                    "SDK_NAME" to "macosx",
+                    "CONFIGURATION" to "Debug",
+                    "ARCHS" to "arm64",
+                    "FRAMEWORKS_FOLDER_PATH" to "Frameworks",
+                    "MACOSX_DEPLOYMENT_TARGET" to "14.0",
+                    "DEPLOYMENT_TARGET_SETTING_NAME" to "MACOSX_DEPLOYMENT_TARGET",
+                ),
+            )
+        }.assertNormalExitValue()
+
+        execOperations.exec {
+            workingDir = layout.projectDirectory.dir("swift-test-harness").asFile
+            commandLine("swift", "test")
+        }.assertNormalExitValue()
+    }
+}
+
 tasks.register("test") {
     group = "verification"
     description =
-        "Runs the host-portable test suite (macOS + JS + WasmJS + Android unit). " +
+        "Runs the host-portable test suite (macOS + JS + WasmJS + Android unit + Swift smoke test). " +
         "Non-host native targets (mingwX64, linuxX64) only run on their own host."
 
     val defaultTestTasks = listOf(
@@ -535,6 +619,7 @@ tasks.register("test") {
         "wasmJsNodeTest",
         "compileAndroidMain",
         "assembleUnitTest",
+        "swiftExportSmokeTest",
     )
 
     dependsOn(defaultTestTasks.mapNotNull { taskName -> tasks.findByName(taskName) })
@@ -591,6 +676,7 @@ val fullTargetBuildTaskNames = setOf(
     "watchosDeviceArm64TestBinaries",
     "watchosSimulatorArm64Binaries",
     "watchosSimulatorArm64TestBinaries",
+    "swiftExportSmokeTest",
     "assembleKasuariXCFramework",
 )
 

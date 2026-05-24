@@ -139,12 +139,12 @@ operator fun Term.plus(rhs: Expression): Expression {
 
 operator fun Expression.plus(rhs: Term): Expression {
     val result = this.copy()
-    result.terms.add(rhs)
+    result.terms = result.terms + rhs
     return result
 }
 
 operator fun Expression.plusAssign(rhs: Term) {
-    terms.add(rhs)
+    terms = terms + rhs
 }
 
 operator fun Term.minus(rhs: Double): Expression =
@@ -171,12 +171,12 @@ operator fun Term.minus(rhs: Expression): Expression {
 
 operator fun Expression.minus(rhs: Term): Expression {
     val result = this.copy()
-    result.terms.add(-rhs)
+    result.terms = result.terms + (-rhs)
     return result
 }
 
 operator fun Expression.minusAssign(rhs: Term) {
-    terms.add(-rhs)
+    terms = terms + (-rhs)
 }
 
 // ============================================================================
