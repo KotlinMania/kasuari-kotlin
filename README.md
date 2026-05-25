@@ -41,7 +41,7 @@ Kasuari-Kotlin is published to Maven Central as
 
 ```kotlin
 dependencies {
-    implementation("io.github.kotlinmania:kasuari-kotlin:0.1.5")
+    implementation("io.github.kotlinmania:kasuari-kotlin:0.1.6")
 }
 ```
 
@@ -52,7 +52,7 @@ kotlin {
     sourceSets {
         val commonMain by getting {
             dependencies {
-                implementation("io.github.kotlinmania:kasuari-kotlin:0.1.5")
+                implementation("io.github.kotlinmania:kasuari-kotlin:0.1.6")
             }
         }
     }
