@@ -15,6 +15,9 @@ build/
 *.iml
 out/
 
+# Repo-local scratch/cache artifacts for audits and one-off tool metadata
+.local/
+
 # Upstream Rust source — clone freshly when porting begins
 tmp/
 !tmp/.gitkeep

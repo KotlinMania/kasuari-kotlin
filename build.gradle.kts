@@ -325,11 +325,11 @@ tasks.withType<AbstractTestTask>().configureEach {
 }
 
 rootProject.extensions.configure<NodeJsEnvSpec>("kotlinNodeJsSpec") {
-    version.set("24.15.0")
+    version.set("24.16.0")
 }
 
 rootProject.extensions.configure<WasmNodeJsEnvSpec>("kotlinWasmNodeJsSpec") {
-    version.set("24.15.0")
+    version.set("24.16.0")
 }
 
 rootProject.extensions.configure<YarnRootEnvSpec>("kotlinYarnSpec") {
@@ -341,14 +341,14 @@ rootProject.extensions.configure<WasmYarnRootEnvSpec>("kotlinWasmYarnSpec") {
 }
 
 rootProject.extensions.configure<YarnRootExtension>("kotlinYarn") {
-    resolution("diff", "8.0.3")
-    resolution("**/diff", "8.0.3")
+    resolution("diff", "9.0.0")
+    resolution("**/diff", "9.0.0")
     resolution("fast-uri", "3.1.2")
     resolution("**/fast-uri", "3.1.2")
     resolution("serialize-javascript", "7.0.5")
     resolution("**/serialize-javascript", "7.0.5")
-    resolution("webpack", "5.106.2")
-    resolution("**/webpack", "5.106.2")
+    resolution("webpack", "5.107.1")
+    resolution("**/webpack", "5.107.1")
     resolution("follow-redirects", "1.16.0")
     resolution("**/follow-redirects", "1.16.0")
     resolution("lodash", "4.18.1")
@@ -367,15 +367,15 @@ rootProject.extensions.configure<YarnRootExtension>("kotlinYarn") {
     resolution("**/qs", "6.15.2")
     resolution("socket.io-parser", "4.2.6")
     resolution("**/socket.io-parser", "4.2.6")
-    resolution("ws", "8.20.1")
-    resolution("**/ws", "8.20.1")
+    resolution("ws", "8.21.0")
+    resolution("**/ws", "8.21.0")
 }
 
 
 val patchedKarmaWebpackPackage = rootProject.layout.projectDirectory.dir("gradle/npm/karma-webpack").asFile.absolutePath.replace("\\", "/")
 
 rootProject.extensions.configure<NodeJsRootExtension>("kotlinNodeJs") {
-    versions.webpack.version = "5.106.2"
+    versions.webpack.version = "5.107.1"
     versions.webpackCli.version = "7.0.2"
     versions.karma.version = "npm:karma-maintained@6.4.7"
     versions.karmaWebpack.version = "file:$patchedKarmaWebpackPackage"
