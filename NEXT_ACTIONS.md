@@ -5,11 +5,11 @@ Based on AST analysis, here are the concrete next steps.
 ## Summary
 
 - **Files Present:** 10/10 (100.0%)
-- **Function parity:** 72/139 matched (target 182) — 51.8%
-- **Class/type parity:** 21/27 matched (target 36) — 77.8%
-- **Combined symbol parity:** 93/166 matched (target 218) — 56.0%
-- **Average inline-code cosine:** 0.43 (function body across 9 matched files)
-- **Average documentation cosine:** 0.72 (doc text across 9 matched files)
+- **Function parity:** 107/139 matched (target 307) — 77.0%
+- **Class/type parity:** 21/27 matched (target 40) — 77.8%
+- **Combined symbol parity:** 128/166 matched (target 347) — 77.1%
+- **Average inline-code cosine:** 0.49 (function body across 9 matched files)
+- **Average documentation cosine:** 0.71 (doc text across 9 matched files)
 - **Cheat-zeroed Files:** 0
 - **Critical Issues:** 7 files with <0.60 function similarity
 
@@ -29,42 +29,18 @@ Every matched file is listed below with function and type symbol parity.
 
 ### 1. strength
 
-- **Target:** `Strength`
+- **Target:** `kasuari.Strength`
 - **Similarity:** 0.25
 - **Dependents:** 2
 - **Priority Score:** 2071707.5
-- **Functions:** 9/15 matched (target 18)
+- **Functions:** 9/15 matched (target 92)
 - **Missing functions:** `add_assign`, `sub_assign`, `mul`, `mul_assign`, `cmp`, `partial_cmp`
-- **Types:** 1/2 matched (target 1)
+- **Types:** 1/2 matched
 - **Missing types:** `Output`
 
-### 2. variable
+### 2. expression
 
-- **Target:** `Variable`
-- **Similarity:** 0.08
-- **Dependents:** 1
-- **Priority Score:** 1263009.2
-- **Functions:** 3/28 matched (target 33)
-- **Missing functions:** `from_id`, `add`, `add_assign`, `neg`, `sub`, `sub_assign`, `mul`, `variable_default`, `variable_add_f64`, `variable_add_f32`, `variable_add_variable`, `variable_add_term`, `variable_add_expression`, `variable_add_assign`, `variable_sub_f64`, `variable_sub_f32`, `variable_sub_variable`, `variable_sub_term`, `variable_sub_expression`, `variable_sub_assign`, `variable_mul_f64`, `variable_mul_f32`, `variable_div_f64`, `variable_div_f32`, `variable_neg`
-- **Types:** 1/2 matched (target 1)
-- **Missing types:** `Output`
-- **Tests:** 0/19 matched
-
-### 3. term
-
-- **Target:** `Term`
-- **Similarity:** 0.13
-- **Dependents:** 1
-- **Priority Score:** 1243008.6
-- **Functions:** 5/28 matched (target 31)
-- **Missing functions:** `mul`, `mul_assign`, `add`, `add_assign`, `neg`, `sub`, `sub_assign`, `mul_f64`, `mul_f32`, `mul_assign_f64`, `mul_assign_f32`, `div_f64`, `div_f32`, `div_assign_f64`, `div_assign_f32`, `add_f64`, `add_f32`, `add_term`, `add_expression`, `sub_f64`, `sub_f32`, `sub_term`, `sub_expression`
-- **Types:** 1/2 matched (target 1)
-- **Missing types:** `Output`
-- **Tests:** 0/16 matched
-
-### 4. expression
-
-- **Target:** `Expression`
+- **Target:** `kasuari.Expression`
 - **Similarity:** 0.25
 - **Dependents:** 1
 - **Priority Score:** 1091807.5
@@ -73,31 +49,55 @@ Every matched file is listed below with function and type symbol parity.
 - **Types:** 1/2 matched (target 1)
 - **Missing types:** `Output`
 
+### 3. variable
+
+- **Target:** `kasuari.Variable`
+- **Similarity:** 0.38
+- **Dependents:** 1
+- **Priority Score:** 1083006.1
+- **Functions:** 21/28 matched (target 51)
+- **Missing functions:** `from_id`, `add`, `add_assign`, `neg`, `sub`, `sub_assign`, `mul`
+- **Types:** 1/2 matched
+- **Missing types:** `Output`
+- **Tests:** 18/19 matched
+
+### 4. term
+
+- **Target:** `kasuari.Term`
+- **Similarity:** 0.41
+- **Dependents:** 1
+- **Priority Score:** 1073005.9
+- **Functions:** 22/28 matched (target 50)
+- **Missing functions:** `mul`, `mul_assign`, `add`, `add_assign`, `sub`, `sub_assign`
+- **Types:** 1/2 matched
+- **Missing types:** `Output`
+- **Tests:** 16/16 matched
+
 ### 5. constraint
 
-- **Target:** `Constraint`
+- **Target:** `kasuari.Constraint`
 - **Similarity:** 0.39
 - **Dependents:** 1
 - **Priority Score:** 1041106.1
-- **Functions:** 4/7 matched (target 12)
+- **Functions:** 4/7 matched (target 21)
 - **Missing functions:** `hash`, `eq`, `bitor`
-- **Types:** 3/4 matched (target 3)
+- **Types:** 3/4 matched
 - **Missing types:** `Output`
 
 ### 6. relations
 
-- **Target:** `Relations`
+- **Target:** `kasuari.Relations`
 - **Similarity:** 0.09
 - **Dependents:** 0
 - **Priority Score:** 30609.1
-- **Functions:** 1/3 matched
+- **Functions:** 1/3 matched (target 8)
 - **Missing functions:** `fmt`, `bitor`
 - **Types:** 2/3 matched (target 5)
 - **Missing types:** `Output`
 
 ### 7. solver
 
-- **Target:** `Solver`
+- **Target:** `kasuari.Solver`
 - **Similarity:** 0.85
 - **Dependents:** 0
 - **Priority Score:** 3301.5
@@ -108,7 +108,7 @@ Every matched file is listed below with function and type symbol parity.
 
 ### 8. row
 
-- **Target:** `Row`
+- **Target:** `kasuari.Row`
 - **Similarity:** 0.79
 - **Dependents:** 0
 - **Priority Score:** 1602.1
@@ -119,7 +119,7 @@ Every matched file is listed below with function and type symbol parity.
 
 ### 9. error
 
-- **Target:** `Error`
+- **Target:** `kasuari.Error`
 - **Similarity:** 1.00
 - **Dependents:** 0
 - **Priority Score:** 500.0
@@ -130,7 +130,7 @@ Every matched file is listed below with function and type symbol parity.
 
 ### 10. lib
 
-- **Target:** `Lib [STUB]`
+- **Target:** `kasuari.Lib [STUB]`
 - **Similarity:** 1.00
 - **Dependents:** 0
 - **Priority Score:** 0.0

@@ -2,11 +2,11 @@
   "type": "port",
   "name": "kasuari-kotlin",
   "source": {
-    "path": "tmp/scan-rust",
+    "path": "tmp/kasuari-rs/src",
     "lang": "rust"
   },
   "target": {
-    "path": "tmp/scan-kotlin",
+    "path": "src/commonMain/kotlin",
     "lang": "kotlin"
   },
   "checks": {
