@@ -1,6 +1,6 @@
 # port-lint Proposed Changes
 
-**Generated:** 2026-08-26
+**Generated:** 2026-08-28
 **Source:** src
 **Target:** src/commonMain/kotlin
 
