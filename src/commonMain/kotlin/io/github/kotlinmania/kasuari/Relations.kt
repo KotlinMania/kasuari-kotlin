@@ -32,8 +32,7 @@ enum class RelationalOperator {
 
 /**
  * This is part of the syntactic sugar used for specifying constraints. This sealed class should
- * be used as part of a constraint expression. See the package documentation on [Kasuari] for
- * more information.
+ * be used as part of a constraint expression. See the module documentation for more information.
  */
 sealed class WeightedRelation(
     val strength: Strength,

@@ -3,6 +3,7 @@
 
 package io.github.kotlinmania.kasuari
 
+import io.github.kotlinmania.thiserror.StdError
 import kotlin.native.HiddenFromObjC
 
 /**
@@ -11,7 +12,9 @@ import kotlin.native.HiddenFromObjC
 @HiddenFromObjC
 sealed class AddConstraintError(
     message: String,
-) : Exception(message) {
+    cause: Throwable? = null,
+) : Exception(message, cause),
+    StdError {
     /**
      * The constraint specified has already been added to the solver.
      */
@@ -32,7 +35,7 @@ sealed class AddConstraintError(
      */
     data class InternalSolverError(
         val error: io.github.kotlinmania.kasuari.InternalSolverError,
-    ) : AddConstraintError("The solver entered an invalid state. If this occurs please report the issue.")
+    ) : AddConstraintError("The solver entered an invalid state. If this occurs please report the issue.", error)
 }
 
 /**
@@ -41,7 +44,9 @@ sealed class AddConstraintError(
 @HiddenFromObjC
 sealed class RemoveConstraintError(
     message: String,
-) : Exception(message) {
+    cause: Throwable? = null,
+) : Exception(message, cause),
+    StdError {
     /**
      * The constraint specified was not already in the solver, so cannot be removed.
      */
@@ -56,7 +61,7 @@ sealed class RemoveConstraintError(
      */
     data class InternalSolverError(
         val error: io.github.kotlinmania.kasuari.InternalSolverError,
-    ) : RemoveConstraintError("The solver entered an invalid state. If this occurs please report the issue.")
+    ) : RemoveConstraintError("The solver entered an invalid state. If this occurs please report the issue.", error)
 }
 
 /**
@@ -65,7 +70,9 @@ sealed class RemoveConstraintError(
 @HiddenFromObjC
 sealed class AddEditVariableError(
     message: String,
-) : Exception(message) {
+    cause: Throwable? = null,
+) : Exception(message, cause),
+    StdError {
     /**
      * The specified variable is already marked as an edit variable in the solver.
      */
@@ -87,7 +94,9 @@ sealed class AddEditVariableError(
 @HiddenFromObjC
 sealed class RemoveEditVariableError(
     message: String,
-) : Exception(message) {
+    cause: Throwable? = null,
+) : Exception(message, cause),
+    StdError {
     /**
      * The specified variable was not an edit variable in the solver, so cannot be removed.
      */
@@ -102,7 +111,7 @@ sealed class RemoveEditVariableError(
      */
     data class InternalSolverError(
         val error: io.github.kotlinmania.kasuari.InternalSolverError,
-    ) : RemoveEditVariableError("The solver entered an invalid state. If this occurs please report the issue.")
+    ) : RemoveEditVariableError("The solver entered an invalid state. If this occurs please report the issue.", error)
 }
 
 /**
@@ -111,7 +120,9 @@ sealed class RemoveEditVariableError(
 @HiddenFromObjC
 sealed class SuggestValueError(
     message: String,
-) : Exception(message) {
+    cause: Throwable? = null,
+) : Exception(message, cause),
+    StdError {
     /**
      * The specified variable was not an edit variable in the solver, so cannot have its value
      * suggested.
@@ -127,5 +138,5 @@ sealed class SuggestValueError(
      */
     data class InternalSolverError(
         val error: io.github.kotlinmania.kasuari.InternalSolverError,
-    ) : SuggestValueError("The solver entered an invalid state. If this occurs please report the issue.")
+    ) : SuggestValueError("The solver entered an invalid state. If this occurs please report the issue.", error)
 }

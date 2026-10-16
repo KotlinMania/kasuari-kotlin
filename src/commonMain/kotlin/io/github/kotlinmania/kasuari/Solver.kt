@@ -3,6 +3,7 @@
 
 package io.github.kotlinmania.kasuari
 
+import io.github.kotlinmania.thiserror.StdError
 import kotlin.native.HiddenFromObjC
 
 /**
@@ -14,7 +15,9 @@ import kotlin.native.HiddenFromObjC
  * @see Solver
  */
 @HiddenFromObjC
-sealed class InternalSolverError : Exception() {
+sealed class InternalSolverError :
+    Exception(),
+    StdError {
     /**
      * The objective function is unbounded.
      *
@@ -572,6 +575,7 @@ class Solver {
                         Tag(marker = slack, other = Symbol.invalid())
                     }
                 }
+
                 RelationalOperator.Equal -> {
                     if (constraint.strength() < Strength.REQUIRED) {
                         val errplus = Symbol.new(idTick, SymbolKind.Error)
