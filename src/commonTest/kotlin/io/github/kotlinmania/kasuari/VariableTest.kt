@@ -152,4 +152,10 @@ class VariableTest {
     fun variableNeg() {
         assertEquals(-LEFT, -LEFT_TERM)
     }
+
+    @Test
+    fun variableFromId() {
+        val v = Variable.fromId(42)
+        assertEquals(42L, v.id)
+    }
 }

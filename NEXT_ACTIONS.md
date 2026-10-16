@@ -4,14 +4,14 @@ Based on AST analysis, here are the concrete next steps.
 
 ## Summary
 
-- **Files Present:** 10/10 (100.0%)
-- **Function parity:** 107/139 matched (target 307) — 77.0%
-- **Class/type parity:** 21/27 matched (target 40) — 77.8%
+- **Files Present:** 9/10 (90.0%)
+- **Function parity:** 107/139 matched (target 308) — 77.0%
+- **Class/type parity:** 21/27 matched (target 39) — 77.8%
 - **Combined symbol parity:** 128/166 matched (target 347) — 77.1%
 - **Average inline-code cosine:** 0.49 (function body across 9 matched files)
-- **Average documentation cosine:** 0.71 (doc text across 9 matched files)
+- **Average documentation cosine:** 0.72 (doc text across 9 matched files)
 - **Cheat-zeroed Files:** 0
-- **Critical Issues:** 7 files with <0.60 function similarity
+- **Critical Issues:** 6 files with <0.60 function similarity
 
 ## Priority 1: Fix Incomplete High-Dependency Files
 
@@ -55,7 +55,7 @@ Every matched file is listed below with function and type symbol parity.
 - **Similarity:** 0.38
 - **Dependents:** 1
 - **Priority Score:** 1083006.1
-- **Functions:** 21/28 matched (target 51)
+- **Functions:** 21/28 matched (target 52)
 - **Missing functions:** `from_id`, `add`, `add_assign`, `neg`, `sub`, `sub_assign`, `mul`
 - **Types:** 1/2 matched
 - **Missing types:** `Output`
@@ -128,17 +128,6 @@ Every matched file is listed below with function and type symbol parity.
 - **Types:** 5/5 matched (target 12)
 - **Missing types:** _none_
 
-### 10. lib
-
-- **Target:** `kasuari.Lib [STUB]`
-- **Similarity:** 1.00
-- **Dependents:** 0
-- **Priority Score:** 0.0
-- **Functions:** 0/0 matched
-- **Missing functions:** _none_
-- **Types:** 0/0 matched (target 1)
-- **Missing types:** _none_
-
 ## Success Criteria
 
 For each file to be considered "complete":
@@ -147,4 +136,17 @@ For each file to be considered "complete":
 - All tests ported
 - Documentation ported
 - port-lint header present
+
+## Reexport / Wiring Modules
+
+These files match `reexport_modules` patterns in `.ast_distance_config.json`. They are filtered out of
+normal priority and missing-file ladders because they are wiring
+modules, not direct logic ports. Consult them for call-site routing;
+do not treat them as the next implementation target by default.
+
+### Missing
+
+| Source | Expected target | Deps | Source path | Expected path |
+|--------|-----------------|------|-------------|---------------|
+| `lib` | `Lib` | 0 | `lib.rs` | `Lib.kt` |
 
