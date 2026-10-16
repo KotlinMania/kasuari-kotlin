@@ -118,11 +118,12 @@ data class Expression(
         fun fromTerms(terms: Iterable<Term>): Expression =
             Expression(terms.toMutableList(), 0.0)
 
-        /**
-         * Constructs an expression from a sequence of terms (useful for lazy evaluation).
-         */
+        /** Constructs an expression from a sequence of terms (useful for lazy evaluation). */
         fun fromTerms(terms: Sequence<Term>): Expression =
             Expression(terms.toMutableList(), 0.0)
+
+        /** Constructs an expression from an iterable/iterator of terms. */
+        fun fromIter(terms: Iterable<Term>): Expression = fromTerms(terms)
 
         /**
          * Constructs an expression from a single variable.
@@ -136,6 +137,101 @@ data class Expression(
 
         /** Constructs an expression from a single variable — convenience alias for [fromVariable]. */
         fun from(variable: Variable): Expression = fromVariable(variable)
+    }
+
+    fun neg(): Expression = -this
+
+    fun mul(rhs: Double): Expression = this * rhs
+
+    fun mul(rhs: Float): Expression = this * rhs
+
+    fun mulAssign(rhs: Double) {
+        this *= rhs
+    }
+
+    fun mulAssign(rhs: Float) {
+        this *= rhs
+    }
+
+    operator fun div(rhs: Double): Expression {
+        val result = this.copy()
+        result.constant /= rhs
+        val scaledTerms = result.terms.toMutableList()
+        for (i in scaledTerms.indices) {
+            scaledTerms[i] = scaledTerms[i] / rhs
+        }
+        result.terms = scaledTerms
+        return result
+    }
+
+    operator fun div(rhs: Float): Expression = this / rhs.toDouble()
+
+    fun divAssign(rhs: Double) {
+        this /= rhs
+    }
+
+    fun divAssign(rhs: Float) {
+        this /= rhs
+    }
+
+    fun add(rhs: Double): Expression = this + rhs
+
+    fun add(rhs: Float): Expression = this + rhs
+
+    fun add(rhs: Variable): Expression = this + rhs
+
+    fun add(rhs: Term): Expression = this + rhs
+
+    fun add(rhs: Expression): Expression = this + rhs
+
+    fun addAssign(rhs: Double) {
+        this += rhs
+    }
+
+    fun addAssign(rhs: Float) {
+        this += rhs
+    }
+
+    fun addAssign(rhs: Variable) {
+        this += rhs
+    }
+
+    fun addAssign(rhs: Term) {
+        this += rhs
+    }
+
+    fun addAssign(rhs: Expression) {
+        this += rhs
+    }
+
+    fun sub(rhs: Double): Expression = this - rhs
+
+    fun sub(rhs: Float): Expression = this - rhs
+
+    fun sub(rhs: Variable): Expression = this - rhs
+
+    fun sub(rhs: Term): Expression = this - rhs
+
+    fun sub(rhs: Expression): Expression = this - rhs
+
+    fun subAssign(rhs: Double) {
+        this -= rhs
+    }
+
+    fun subAssign(rhs: Float) {
+        this -= rhs
+    }
+
+    fun subAssign(rhs: Variable) {
+        this -= rhs
+    }
+
+    fun subAssign(rhs: Term) {
+        this -= rhs
+    }
+
+    fun subAssign(rhs: Expression) {
+        this -= rhs
     }
 }
 
@@ -170,21 +266,6 @@ operator fun Expression.times(rhs: Float): Expression = this * rhs.toDouble()
 
 /** Multiplies a scalar (Float) by this expression, producing a new [Expression]. */
 operator fun Float.times(rhs: Expression): Expression = rhs * this.toDouble()
-
-/** Divides this expression by a scalar, producing a new [Expression]. */
-operator fun Expression.div(rhs: Double): Expression {
-    val result = this.copy()
-    result.constant /= rhs
-    val scaledTerms = result.terms.toMutableList()
-    for (i in scaledTerms.indices) {
-        scaledTerms[i] = scaledTerms[i] / rhs
-    }
-    result.terms = scaledTerms
-    return result
-}
-
-/** Divides this expression by a scalar (Float), producing a new [Expression]. */
-operator fun Expression.div(rhs: Float): Expression = this / rhs.toDouble()
 
 /** Adds a constant to this expression, producing a new [Expression]. */
 operator fun Expression.plus(rhs: Double): Expression {

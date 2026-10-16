@@ -68,6 +68,12 @@ class Constraint private constructor(
         if (other !is Constraint) return false
         return id == other.id
     }
+
+    /** Formats the constraint hash, mirroring `Hash`. */
+    fun hash(): Int = hashCode()
+
+    /** Identity-based equality check, mirroring `PartialEq::eq`. */
+    fun eq(other: Constraint): Boolean = this == other
 }
 
 /**
@@ -123,4 +129,24 @@ class PartialConstraint(
         val (operator, strength) = relation.toOperatorAndStrength()
         return Constraint.new(expression - rhs, operator, strength)
     }
+
+    infix fun or(rhs: Double): Constraint = to(rhs)
+
+    infix fun or(rhs: Float): Constraint = to(rhs)
+
+    infix fun or(rhs: Variable): Constraint = to(rhs)
+
+    infix fun or(rhs: Term): Constraint = to(rhs)
+
+    infix fun or(rhs: Expression): Constraint = to(rhs)
+
+    fun bitor(rhs: Double): Constraint = to(rhs)
+
+    fun bitor(rhs: Float): Constraint = to(rhs)
+
+    fun bitor(rhs: Variable): Constraint = to(rhs)
+
+    fun bitor(rhs: Term): Constraint = to(rhs)
+
+    fun bitor(rhs: Expression): Constraint = to(rhs)
 }
