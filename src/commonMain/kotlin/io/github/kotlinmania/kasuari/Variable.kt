@@ -32,7 +32,35 @@ data class Variable internal constructor(
          * Kotlin test suite to mint deterministic variables in fixtures.
          */
         fun fromId(id: Long): Variable = Variable(id)
+
+        fun fromId(id: Int): Variable = Variable(id.toLong())
     }
+
+    fun add(constant: Double): Expression = this + constant
+
+    fun add(constant: Float): Expression = this + constant
+
+    fun add(other: Variable): Expression = this + other
+
+    fun add(term: Term): Expression = this + term
+
+    fun add(expression: Expression): Expression = this + expression
+
+    fun sub(constant: Double): Expression = this - constant
+
+    fun sub(constant: Float): Expression = this - constant
+
+    fun sub(other: Variable): Expression = this - other
+
+    fun sub(term: Term): Expression = this - term
+
+    fun sub(expression: Expression): Expression = this - expression
+
+    fun mul(coefficient: Double): Term = this * coefficient
+
+    fun mul(coefficient: Float): Term = this * coefficient
+
+    fun neg(): Term = -this
 
     operator fun plus(constant: Double): Expression = Term.from(this) + constant
 

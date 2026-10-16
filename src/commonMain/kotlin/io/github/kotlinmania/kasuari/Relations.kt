@@ -28,6 +28,9 @@ enum class RelationalOperator {
             Equal -> "=="
             GreaterOrEqual -> ">="
         }
+
+    /** Formats the operator as a string, mirroring `fmt::Display`. */
+    fun fmt(): String = toString()
 }
 
 /**
@@ -96,3 +99,23 @@ infix fun Term.with(relation: WeightedRelation): PartialConstraint =
 
 infix fun Expression.with(relation: WeightedRelation): PartialConstraint =
     PartialConstraint.new(this, relation)
+
+infix fun Double.or(relation: WeightedRelation): PartialConstraint = this with relation
+
+infix fun Float.or(relation: WeightedRelation): PartialConstraint = this with relation
+
+infix fun Variable.or(relation: WeightedRelation): PartialConstraint = this with relation
+
+infix fun Term.or(relation: WeightedRelation): PartialConstraint = this with relation
+
+infix fun Expression.or(relation: WeightedRelation): PartialConstraint = this with relation
+
+fun Double.bitor(relation: WeightedRelation): PartialConstraint = this with relation
+
+fun Float.bitor(relation: WeightedRelation): PartialConstraint = this with relation
+
+fun Variable.bitor(relation: WeightedRelation): PartialConstraint = this with relation
+
+fun Term.bitor(relation: WeightedRelation): PartialConstraint = this with relation
+
+fun Expression.bitor(relation: WeightedRelation): PartialConstraint = this with relation

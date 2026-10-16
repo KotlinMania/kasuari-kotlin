@@ -126,6 +126,46 @@ data class Strength(
         new(this.value / rhs.toDouble())
 
     /**
+     * Multiply a strength by a Double scalar, clipping the result to the legal range.
+     */
+    fun mul(rhs: Double): Strength = mulF64(rhs)
+
+    /**
+     * Multiply a strength by a Float scalar, clipping the result to the legal range.
+     */
+    fun mul(rhs: Float): Strength = mulF32(rhs)
+
+    /**
+     * Perform an addition of two strengths, clipping the result to the legal range.
+     */
+    fun addAssign(rhs: Strength): Strength = add(rhs)
+
+    /**
+     * Perform a subtraction of two strengths, clipping the result to the legal range.
+     */
+    fun subAssign(rhs: Strength): Strength = sub(rhs)
+
+    /**
+     * Perform a multiplication of a strength by a Double scalar, clipping the result to the legal range.
+     */
+    fun mulAssign(rhs: Double): Strength = mulF64(rhs)
+
+    /**
+     * Perform a multiplication of a strength by a Float scalar, clipping the result to the legal range.
+     */
+    fun mulAssign(rhs: Float): Strength = mulF32(rhs)
+
+    /**
+     * Total ordering comparison for strengths.
+     */
+    fun cmp(other: Strength): Int = compareTo(other)
+
+    /**
+     * Partial ordering comparison for strengths.
+     */
+    fun partialCmp(other: Strength): Int? = compareTo(other)
+
+    /**
      * Compare two strengths by their underlying value.
      */
     override fun compareTo(other: Strength): Int =

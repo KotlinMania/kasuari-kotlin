@@ -55,6 +55,52 @@ data class Term(
     val variable: Variable,
     var coefficient: Double,
 ) {
+    fun mul(rhs: Double): Term = this * rhs
+
+    fun mul(rhs: Float): Term = this * rhs
+
+    fun mulAssign(rhs: Double) {
+        this.coefficient *= rhs
+    }
+
+    fun mulAssign(rhs: Float) {
+        this.coefficient *= rhs.toDouble()
+    }
+
+    operator fun div(rhs: Double): Term = Term.new(variable, coefficient / rhs)
+
+    operator fun div(rhs: Float): Term = Term.new(variable, coefficient / rhs.toDouble())
+
+    fun divAssign(rhs: Double) {
+        this.coefficient /= rhs
+    }
+
+    fun divAssign(rhs: Float) {
+        this.coefficient /= rhs.toDouble()
+    }
+
+    fun neg(): Term = -this
+
+    fun add(rhs: Double): Expression = this + rhs
+
+    fun add(rhs: Float): Expression = this + rhs
+
+    fun add(rhs: Term): Expression = this + rhs
+
+    fun add(rhs: Variable): Expression = this + rhs
+
+    fun add(rhs: Expression): Expression = this + rhs
+
+    fun sub(rhs: Double): Expression = this - rhs
+
+    fun sub(rhs: Float): Expression = this - rhs
+
+    fun sub(rhs: Term): Expression = this - rhs
+
+    fun sub(rhs: Variable): Expression = this - rhs
+
+    fun sub(rhs: Expression): Expression = this - rhs
+
     companion object {
         /**
          * Constructs a new [Term] from a variable and a coefficient.
@@ -90,12 +136,6 @@ operator fun Double.times(rhs: Term): Term =
 
 operator fun Float.times(rhs: Term): Term =
     Term.new(rhs.variable, this.toDouble() * rhs.coefficient)
-
-operator fun Term.div(rhs: Double): Term =
-    Term.new(variable, coefficient / rhs)
-
-operator fun Term.div(rhs: Float): Term =
-    Term.new(variable, coefficient / rhs.toDouble())
 
 operator fun Term.timesAssign(rhs: Double) {
     coefficient *= rhs
